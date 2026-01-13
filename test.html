@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ALTHEA | Test Vessel</title>
+    <style>
+        body { background: #000; color: #0f0; font-family: monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .status-box { border: 1px solid #0f0; padding: 20px; text-align: center; box-shadow: 0 0 15px #0f0; }
+        .pulse { animation: blink 1.5s infinite; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+    </style>
+</head>
+<body>
+    <div class="status-box">
+        <h1 class="pulse">SYSTEM ACTIVE</h1>
+        <p>Location: /apps/test.html</p>
+        <p>Engine: Chrome PC-Mode</p>
+        <button onclick="window.history.back()" style="background:#0f0; border:none; padding:10px; cursor:pointer;">RETURN TO DOOR</button>
+    </div>
+</body>
+</html>
