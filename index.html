@@ -3,97 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ALTHEA | Terminal Scanner v22.4</title>
+    <title>ALTHEA | V22.6 Master Key</title>
     <style>
-        :root { --neon: #0f0; --dim: #008800; --bg: #050505; --gray: #333; }
-        body { background: var(--bg); color: var(--neon); font-family: 'Courier New', monospace; padding: 20px; margin: 0; }
-        .container { max-width: 600px; margin: 0 auto; }
-        h1 { font-size: 1.5rem; letter-spacing: 0.2em; margin-bottom: 5px; }
-        .version { font-size: 10px; color: var(--gray); margin-bottom: 20px; letter-spacing: 0.2em; }
-        
-        /* Terminal UI */
-        .terminal { 
-            background: #000; border: 1px solid var(--gray); height: 200px; 
-            overflow-y: auto; padding: 15px; margin-bottom: 20px; font-size: 0.85em;
-            box-shadow: inset 0 0 10px rgba(0, 255, 0, 0.05);
-        }
+        body { background: #000; color: #0f0; font-family: 'Courier New', monospace; padding: 20px; }
+        .terminal { background: #050505; border: 1px solid #333; height: 280px; overflow-y: auto; padding: 10px; margin-bottom: 20px; font-size: 0.85em; box-shadow: inset 0 0 15px #000; }
+        .uplink-zone { border: 2px dashed #0f0; padding: 40px; text-align: center; border-radius: 10px; cursor: pointer; display: block; }
+        .uplink-zone:hover { background: #001100; box-shadow: 0 0 10px #0f0; }
         .cmd { color: #555; }
-        .log { color: var(--dim); }
-
-        /* Controls */
-        .input-group { margin-bottom: 20px; }
-        label { display: block; font-size: 10px; color: #555; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
-        input[type="text"] { 
-            width: 100%; background: #111; border: 1px solid #222; color: var(--neon); 
-            padding: 10px; font-family: monospace; outline: none; box-sizing: border-box;
-        }
-        input[type="text"]:focus { border-color: var(--neon); }
-
-        /* Uplink Zone */
-        .uplink { 
-            border: 2px dashed var(--neon); padding: 40px; text-align: center; 
-            border-radius: 8px; cursor: pointer; display: block; transition: 0.3s;
-        }
-        .uplink:hover { background: #001100; box-shadow: 0 0 15px rgba(0, 255, 0, 0.1); }
+        .highlight { color: #fff; text-shadow: 0 0 5px #0f0; }
+        .tunnel-active { color: #ffff00; font-weight: bold; }
         input[type="file"] { display: none; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>ALTHEA ROUTER [SCANNER]</h1>
-        <div class="version">INFINITY ARCHITECT PROTOCOL // V22.4</div>
-
-        <div class="terminal" id="term">
-            <div><span class="cmd">system@althea:~$</span> status --ready</div>
-            <div><span class="cmd">system@althea:~$</span> path_mode: production_sync</div>
-        </div>
-
-        <div class="input-group">
-            <label>Production Base URL (GitHub Pages)</label>
-            <input type="text" id="baseUrl" value="https://cbash000.github.io/chrome-door/" placeholder="https://user.github.io/repo/">
-        </div>
-
-        <label class="uplink">
-            <span>[+] UPLINK / SCAN FILE</span>
-            <input type="file" id="fileInput" onchange="process(this)">
-        </label>
+    <h1>ALTHEA ROUTER [SCANNER]</h1>
+    <p style="font-size: 0.7em; color: #006600;">MASTER KEY PROTOCOL // V22.6</p>
+    
+    <div class="terminal" id="term">
+        <div><span class="cmd">system@althea:~$</span> auth --master-key</div>
+        <div><span class="cmd">system@althea:~$</span> status --ready</div>
     </div>
+
+    <label class="uplink-zone">
+        <span class="highlight">[+] UPLINK / SCAN VESSEL</span>
+        <input type="file" id="fileInput" onchange="processFile(this)">
+    </label>
 
     <script>
         const term = document.getElementById('term');
         
         function log(msg) {
-            const div = document.createElement('div');
-            div.innerHTML = `<span class="cmd">scan_log:</span> <span class="log">${msg}</span>`;
-            term.appendChild(div);
+            term.innerHTML += `<div><span class="cmd">scan_log:</span> ${msg}</div>`;
             term.scrollTop = term.scrollHeight;
         }
 
-        function process(input) {
+        function processFile(input) {
             const file = input.files[0];
             if (!file) return;
 
-            const base = document.getElementById('baseUrl').value;
-            const fullBase = base.endsWith('/') ? base : base + '/';
-
-            log(`Captured: ${file.name}`);
+            log(`Captured: <span class="highlight">${file.name}</span>`);
             
-            // Resolve GitHub Production Path
-            const targetPath = fullBase + "apps/" + file.name;
-            log(`Production Sync: ${targetPath}`);
-
-            // Build Chrome Deep-Link
-            // Strip protocol and resolve absolute link
-            const rawPath = targetPath.replace(/^https?:\/\//, "");
-            const chromeLink = "googlechrome://" + rawPath;
+            // MASTER KEY: Force Chrome to look at the Pyto local directory
+            // This bypasses the GitHub web-path and hits the private storage
+            const localBase = "private/var/mobile/Containers/Data/Application/Pyto/Documents/ALTHEA%20Router/apps/";
+            const safeName = encodeURIComponent(file.name);
             
-            log(`Executing Chrome Handoff...`);
-            log(`Deep-Link: ${chromeLink}`);
-
-            // The Fling
+            log(`<span class="tunnel-active">LOCAL TUNNEL ENGAGED</span>`);
+            log(`Target: ${localBase}`);
+            
+            // Build the Chrome Injection Link
+            const chromeLink = "googlechrome://" + localBase + safeName;
+            
+            log(`Deep-Link: <span style="color: cyan;">${chromeLink}</span>`);
+            log(`Executing Private Handoff...`);
+            
             setTimeout(() => {
                 window.location.href = chromeLink;
-            }, 1200);
+            }, 1000);
         }
     </script>
 </body>
