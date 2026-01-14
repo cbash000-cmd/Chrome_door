@@ -9,7 +9,7 @@
     
     <link rel="apple-touch-icon" href="nexus-icon.png">
     
-    <title>ALTHEA NEXUS | V25.5</title>
+    <title>ALTHEA NEXUS | V25.6</title>
     <style>
         :root { --neon-green: #0f0; --dark-bg: #000; --panel-bg: #0a0a0a; --ui-cyan: #0ff; }
         body { background: var(--dark-bg); color: var(--neon-green); font-family: 'Courier New', monospace; margin: 0; padding: 10px; display: flex; flex-direction: column; height: 100vh; box-sizing: border-box; overflow: hidden; }
@@ -18,15 +18,33 @@
         .status-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 10px; }
         #statusLight { width: 10px; height: 10px; border-radius: 50%; background: #300; transition: 0.3s; }
 
-        .portal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; flex-grow: 1; min-height: 0; }
-        .panel { display: flex; flex-direction: column; border: 1px solid #222; background: var(--panel-bg); position: relative; order: 0; transition: order 0.3s ease; }
+        /* GRID SYSTEM */
+        .portal-grid { display: flex; flex-direction: column; gap: 8px; flex-grow: 1; min-height: 0; }
+        @media (min-width: 601px) { .portal-grid { flex-direction: row; } }
+
+        .panel { 
+            display: flex; flex-direction: column; border: 1px solid #222; 
+            background: var(--panel-bg); position: relative; flex: 1;
+            order: 0; transition: order 0.3s ease; overflow: hidden;
+        }
         
-        .panel.fullscreen { position: fixed; inset: 0 !important; z-index: 9999; background: var(--dark-bg); }
+        /* THE CRITICAL FULLSCREEN FIX */
+        .panel.fullscreen { 
+            position: fixed !important; 
+            inset: 0 !important; 
+            z-index: 10000 !important; 
+            width: 100vw !important; 
+            height: 100vh !important; 
+            margin: 0 !important; 
+            order: unset !important; 
+            border: none;
+        }
+
         .panel-header { padding: 6px; font-size: 10px; background: #111; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; }
         .panel-header button { background: transparent; color: var(--neon-green); border: 1px solid var(--neon-green); font-size: 9px; padding: 2px 5px; cursor: pointer; }
 
-        textarea { flex-grow: 1; background: transparent; color: var(--neon-green); border: none; padding: 10px; resize: none; font-size: 11px; outline: none; }
-        iframe { flex-grow: 1; background: #fff; border: none; }
+        textarea { flex-grow: 1; background: transparent; color: var(--neon-green); border: none; padding: 10px; resize: none; font-size: 11px; outline: none; width: 100%; height: 100%; }
+        iframe { flex-grow: 1; background: #fff; border: none; width: 100%; height: 100%; }
         
         #vesselHistory { height: 50px; background: #050505; border: 1px solid #222; overflow-y: auto; font-size: 10px; color: #666; padding: 5px; margin-top: 5px; }
 
@@ -36,8 +54,6 @@
         #fileInputLabel { background: #111; color: var(--ui-cyan); border: 1px dashed var(--ui-cyan); text-align: center; padding: 10px; cursor: pointer; font-size: 11px; margin-bottom: 8px; }
 
         @media (max-width: 600px) {
-            .portal-grid { grid-template-columns: 1fr; overflow-y: auto; }
-            .panel { height: 280px; }
             .controls { grid-template-columns: repeat(3, 1fr); }
         }
     </style>
@@ -45,13 +61,13 @@
 <body>
     <div class="status-row">
         <div id="statusLight"></div>
-        <span id="statusText">NEXUS V25.5: ONLINE</span>
+        <span id="statusText">ALTHEA V25.6: ACTIVE</span>
     </div>
 
-    <div class="terminal" id="term"><div>[ALTHEA CORE READY]</div></div>
+    <div class="terminal" id="term"><div>[NEXUS STABILIZED]</div></div>
 
     <label id="fileInputLabel">
-        [+] SCAN LOCAL VESSEL (iCloud/Internal)
+        [+] SCAN LOCAL VESSEL
         <input type="file" id="fileInput" style="display:none" onchange="loadVessel(this)">
     </label>
 
@@ -61,7 +77,7 @@
                 <span>CODE INSPECTOR</span>
                 <div><span id="fileName" style="color:#555">---</span><button onclick="toggleFullscreen(this)">FULL</button></div>
             </div>
-            <textarea id="codeEditor" spellcheck="false" placeholder="Awaiting manifest..."></textarea>
+            <textarea id="codeEditor" spellcheck="false" placeholder="Awaiting code..."></textarea>
         </div>
         <div class="panel" id="portalPanel">
             <div class="panel-header">
@@ -72,7 +88,7 @@
         </div>
     </div>
 
-    <div id="vesselHistory"><div>* SESSION START *</div></div>
+    <div id="vesselHistory"><div>* SESSION READY *</div></div>
 
     <div class="controls">
         <div class="btn" onclick="applyChanges()">APPLY</div>
@@ -106,8 +122,7 @@
                 document.getElementById('codeEditor').value = e.target.result;
                 document.getElementById('fileName').innerText = file.name;
                 applyChanges();
-                addToHistory(file.name, "INJECTED");
-                log(`Vessel ${file.name} manifest loaded.`);
+                addToHistory(file.name, "LOADED");
             };
             reader.readAsText(file);
         }
@@ -120,39 +135,42 @@
             frame.src = URL.createObjectURL(blob);
             document.getElementById('statusLight').style.background = 'var(--neon-green)';
             document.getElementById('statusText').innerText = "ONLINE: IMITATION ACTIVE";
-            log("State applied to Portal.");
+            log("Injection complete.");
         }
 
         function toggleFullscreen(btn) {
             const panel = btn.closest('.panel');
+            
+            // Auto-close any other full-screen panel
             document.querySelectorAll('.panel.fullscreen').forEach(p => {
                 if (p !== panel) {
                     p.classList.remove('fullscreen');
                     p.querySelector('.panel-header button').innerText = 'FULL';
                 }
             });
+
             const isFull = panel.classList.toggle('fullscreen');
             btn.innerText = isFull ? 'EXIT' : 'FULL';
-            log(`UI: ${isFull ? 'Fullscreen focus' : 'Grid focus'}`);
+            log(`UI: ${panel.id} is now ${isFull ? 'FULLSCREEN' : 'GRID'}`);
         }
 
         function swapPanels() {
             isSwapped = !isSwapped;
             document.getElementById('inspectorPanel').style.order = isSwapped ? "2" : "1";
             document.getElementById('portalPanel').style.order = isSwapped ? "1" : "2";
-            log(`UI: Orientation ${isSwapped ? 'Inverted' : 'Standard'}`);
+            log(`UI: Position SWAP ${isSwapped ? 'ON' : 'OFF'}`);
         }
 
         function addToHistory(name, status) {
             const h = document.getElementById('vesselHistory');
-            if (h.innerText.includes("SESSION START")) h.innerHTML = "";
+            if (h.innerText.includes("SESSION READY")) h.innerHTML = "";
             const entry = document.createElement('div');
             entry.innerHTML = `<span style="color:#444">[${new Date().toLocaleTimeString()}]</span> ${name} : ${status}`;
             h.insertBefore(entry, h.firstChild);
         }
 
         function requestSnapshot() {
-            log("Capturing snapshot...");
+            log("Capturing frame...");
             document.getElementById('vesselFrame').contentWindow.postMessage({ type: 'SNAPSHOT_REQUEST' }, '*');
         }
 
