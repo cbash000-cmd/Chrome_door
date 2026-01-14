@@ -1,50 +1,62 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>ALTHEA NEXUS | V26.1 SOVEREIGN</title>
+    <title>ALTHEA NEXUS | V26.5 MAX</title>
     <style>
-        :root { --neon-green: #0f0; --dark-bg: #000; --panel-bg: #0a0a0a; --ui-cyan: #0ff; --bully-magenta: #f0f; --warn-orange: #ffa500; }
+        :root { --neon-green: #0f0; --dark-bg: #000; --panel-bg: #0a0a0a; --ui-cyan: #0ff; --bully-magenta: #f0f; }
         body { background: var(--dark-bg); color: var(--neon-green); font-family: 'Courier New', monospace; margin: 0; padding: 10px; display: flex; flex-direction: column; height: 100vh; box-sizing: border-box; overflow: hidden; }
-        .terminal { background: #050505; border: 1px solid #333; height: 120px; overflow-y: auto; padding: 8px; font-size: 10px; margin-bottom: 8px; border-left: 3px solid var(--neon-green); box-shadow: inset 0 0 10px #000; }
+        .terminal { background: #050505; border: 1px solid #333; height: 80px; overflow-y: auto; padding: 8px; font-size: 10px; margin-bottom: 8px; border-left: 3px solid var(--neon-green); }
+        #fileInputLabel { background: #111; color: var(--ui-cyan); border: 1px dashed var(--ui-cyan); text-align: center; padding: 10px; cursor: pointer; font-size: 10px; margin-bottom: 8px; display: block; }
         .cli-row { display: flex; gap: 5px; margin-bottom: 8px; background: #111; padding: 5px; border: 1px solid #222; font-size: 10px; }
         #cliInput { flex-grow: 1; background: transparent; border: none; color: #fff; font-family: monospace; outline: none; }
-        .portal-grid { display: flex; flex-direction: column; gap: 8px; flex-grow: 1; min-height: 0; }
+        .portal-grid { display: flex; flex-direction: column; gap: 8px; flex-grow: 1; min-height: 0; position: relative; }
         @media (min-width: 601px) { .portal-grid { flex-direction: row; } }
-        .panel { display: flex; flex-direction: column; border: 1px solid #222; background: var(--panel-bg); flex: 1; overflow: hidden; }
+        .panel { display: flex; flex-direction: column; border: 1px solid #222; background: var(--panel-bg); flex: 1; overflow: hidden; transition: 0.2s; }
+        .panel.fullscreen { position: fixed !important; inset: 0 !important; z-index: 10000; width: 100vw; height: 100vh; margin: 0; }
         .panel-header { padding: 6px; font-size: 10px; background: #111; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; }
-        textarea { flex-grow: 1; background: transparent; color: var(--neon-green); border: none; padding: 10px; resize: none; font-size: 11px; outline: none; font-family: 'Courier New', monospace; line-height: 1.4; }
+        .panel-header button { background: transparent; color: var(--neon-green); border: 1px solid var(--neon-green); font-size: 8px; padding: 2px 5px; cursor: pointer; }
+        textarea { flex-grow: 1; background: transparent; color: var(--neon-green); border: none; padding: 10px; resize: none; font-size: 11px; outline: none; font-family: 'Courier New', monospace; }
         iframe { flex-grow: 1; background: #fff; border: none; }
         .controls { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-top: 8px; }
-        .btn { background: #111; color: var(--neon-green); border: 1px solid var(--neon-green); padding: 10px 2px; cursor: pointer; font-size: 8px; font-weight: bold; text-align: center; text-transform: uppercase; }
-        .btn:active { background: var(--neon-green); color: #000; }
+        .btn { background: #111; color: var(--neon-green); border: 1px solid var(--neon-green); padding: 10px 2px; cursor: pointer; font-size: 8px; font-weight: bold; text-align: center; }
     </style>
 </head>
 <body>
-    <div class="terminal" id="term"><div>[SYSTEM_READY] V26.1 Sovereign Core Active.</div></div>
+    <div class="terminal" id="term"><div>[SOVEREIGN_CORE_V26.5] Terminal Ready.</div></div>
+
+    <label id="fileInputLabel">
+        [M] MOUNT & INGEST PHYSICAL FOLDER
+        <input type="file" id="folderPicker" webkitdirectory directory multiple style="display:none" onchange="mountAndIngest(this)">
+    </label>
 
     <div class="cli-row">
         <span style="color:var(--ui-cyan)">root@nexus:~#</span>
-        <input type="text" id="cliInput" placeholder="install [repo] | df | clear" onkeydown="if(event.key==='Enter') runCommand(this.value)">
+        <input type="text" id="cliInput" placeholder="ls | open [file] | clear" onkeydown="if(event.key==='Enter') runCommand(this.value)">
     </div>
 
     <div class="portal-grid">
-        <div class="panel">
-            <div class="panel-header"><span>SYSTEM_INSPECTOR</span><span id="fileName" style="color:#555">app.py [LOCAL]</span></div>
-            <textarea id="codeEditor" spellcheck="false" placeholder="Waiting for code..."></textarea>
-        </div>
-        <div class="panel">
+        <div class="panel" id="p1">
             <div class="panel-header">
-                <span>PORTAL_VIEW</span>
-                <select id="modeSelect" onchange="applyChanges()" style="background:#000; color:var(--neon-green); border:1px solid #333; font-size:9px;">
-                    <option value="html">STATIC_HTML_MODE</option>
-                    <option value="flask">FLASK_SERVER_MODE</option>
-                </select>
+                <span>INSPECTOR: <span id="curFile" style="color:#555">none</span></span>
+                <button onclick="toggleFS('p1')">MAX</button>
             </div>
-            <iframe id="vesselFrame" sandbox="allow-scripts allow-forms allow-modals"></iframe>
+            <textarea id="codeEditor" spellcheck="false" oninput="autoSave()"></textarea>
+        </div>
+        <div class="panel" id="p2">
+            <div class="panel-header">
+                <span>PORTAL: 
+                    <select id="modeSelect" onchange="applyChanges()" style="background:#000; color:var(--neon-green); border:1px solid #333; font-size:9px;">
+                        <option value="html">HTML_MODE</option>
+                        <option value="flask">FLASK_MODE</option>
+                    </select>
+                </span>
+                <button onclick="toggleFS('p2')">MAX</button>
+            </div>
+            <iframe id="vesselFrame"></iframe>
         </div>
     </div>
 
@@ -52,7 +64,7 @@
         <div class="btn" onclick="deepInstall()" style="color:var(--ui-cyan)">DEEP_INSTALL</div>
         <div class="btn" onclick="seedProject()" style="color:var(--bully-magenta)">SEED_STRESS</div>
         <div class="btn" onclick="applyChanges()">HOT_RELOAD</div>
-        <div class="btn" onclick="exportLinuxMirror()" style="color:var(--warn-orange)">EXPORT_TXT</div>
+        <div class="btn" onclick="exportLinuxMirror()" style="color:orange">EXPORT_TXT</div>
         <div class="btn" onclick="document.getElementById('recInput').click()" style="color:#fff">RECOVERY</div>
         <div class="btn" onclick="clearSession()" style="color:red">PURGE</div>
     </div>
@@ -60,101 +72,102 @@
 
     <script>
         const DB_NAME = "NexusFS", STORE_NAME = "files";
-        const log = (m, c="#0f0") => { 
-            const d = document.getElementById('term'); 
-            d.innerHTML += `<div><span style="color:#444">[${new Date().toLocaleTimeString()}]</span> > <span style="color:${c}">${m}</span></div>`; 
-            d.scrollTop = d.scrollHeight; 
-        };
+        let currentFilePath = "";
+        const log = (m, c="#0f0") => { const d = document.getElementById('term'); d.innerHTML += `<div>> <span style="color:${c}">${m}</span></div>`; d.scrollTop = d.scrollHeight; };
+        const openDB = () => new Promise(res => { const r = indexedDB.open(DB_NAME, 1); r.onupgradeneeded = e => e.target.result.createObjectStore(STORE_NAME); r.onsuccess = e => res(e.target.result); });
 
-        const openDB = () => new Promise(res => { 
-            const r = indexedDB.open(DB_NAME, 1); 
-            r.onupgradeneeded = e => e.target.result.createObjectStore(STORE_NAME); 
-            r.onsuccess = e => res(e.target.result); 
-        });
+        function toggleFS(id) {
+            const p = document.getElementById(id);
+            const isFull = p.classList.toggle('fullscreen');
+            p.querySelector('button').innerText = isFull ? 'EXIT' : 'MAX';
+        }
 
-        async function runCommand(val) {
-            const [cmd, path] = val.split(' ');
-            if (cmd === 'install' && path) {
-                log(`FETCHING: ${path}...`, "yellow");
-                // Virtual Pip simulation
-                const db = await openDB();
-                const tx = db.transaction(STORE_NAME, "readwrite");
-                await tx.objectStore(STORE_NAME).put(`# Module ${path}`, `/lib/python3.11/site-packages/${path}/__init__.py`);
-                log(`INSTALLED: ${path}`, "#0f0");
-            } else if (cmd === 'df' || cmd === 'status') {
-                const db = await openDB();
+        async function mountAndIngest(input) {
+            const files = input.files;
+            const db = await openDB();
+            let count = 0;
+            for (const f of files) {
+                if (f.name.match(/\.(html|css|js|py)$/)) {
+                    const content = await f.text();
+                    await db.transaction(STORE_NAME, "readwrite").objectStore(STORE_NAME).put(content, f.name);
+                    count++;
+                    if (f.name === 'index.html' || f.name === 'app.py') loadFile(f.name, content);
+                }
+            }
+            log(`INGESTED ${count} FILES. Use 'ls' to view.`, "#0f0");
+        }
+
+        async function runCommand(v) {
+            const [cmd, arg] = v.split(' ');
+            const db = await openDB();
+            if (cmd === 'ls') {
                 const keys = await new Promise(res => db.transaction(STORE_NAME).objectStore(STORE_NAME).getAllKeys().onsuccess = e => res(e.target.result));
-                log(`DISK_USAGE: ${keys.length} blocks mapped.`, "var(--ui-cyan)");
+                log("DRIVE: " + (keys.join(', ') || 'EMPTY'), "white");
+            } else if (cmd === 'open' && arg) {
+                const req = db.transaction(STORE_NAME).objectStore(STORE_NAME).get(arg);
+                req.onsuccess = () => req.result ? loadFile(arg, req.result) : log("FILE NOT FOUND", "red");
             } else if (cmd === 'clear') { document.getElementById('term').innerHTML = ''; }
             document.getElementById('cliInput').value = '';
         }
 
-        async function deepInstall() {
-            log("INITIATING DEEP-STACK...", "var(--ui-cyan)");
-            const libs = ['flask', 'werkzeug', 'jinja2', 'click', 'itsdangerous', 'markupsafe'];
-            const db = await openDB();
-            for (const lib of libs) {
-                const tx = db.transaction(STORE_NAME, "readwrite");
-                await tx.objectStore(STORE_NAME).put(`# ${lib} virtualized`, `/lib/python3.11/site-packages/${lib}/__init__.py`);
-                log(`PROVISIONED: ${lib}`, "yellow");
-            }
-            log("LINUX MIRROR READY.", "#0f0");
-        }
-
-        async function seedProject() {
-            const stressCode = `<!DOCTYPE html><body style="background:#000;overflow:hidden;"><script>for(let i=0;i<50;i++){const r=document.createElement('div');r.style="position:absolute;border:2px solid #0f0;border-radius:50%;width:"+(50+i*5)+"px;height:"+(50+i*5)+"px;left:calc(50% - "+(25+i*2.5)+"px);top:calc(50% - "+(25+i*2.5)+"px);box-shadow:0 0 10px #0f0;animation:p 2s infinite "+(i*0.1)+"s";document.body.appendChild(r);}document.write('<style>@keyframes p{0%,100%{opacity:0.3;transform:scale(1)}50%{opacity:1;transform:scale(1.1)}}</style><div style="color:#0f0;font-family:monospace;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#000;padding:10px;border:1px solid #0f0;">FLASK ENGINE: 50 RINGS ACTIVE</div>')<\/script></body>`;
-            document.getElementById('codeEditor').value = stressCode;
-            const db = await openDB();
-            await db.transaction(STORE_NAME, "readwrite").objectStore(STORE_NAME).put(stressCode, "app.py");
-            log("SEEDING: app.py written to Virtual Drive.", "var(--bully-magenta)");
+        function loadFile(name, content) {
+            currentFilePath = name;
+            document.getElementById('curFile').innerText = name;
+            document.getElementById('codeEditor').value = content;
             applyChanges();
         }
 
+        async function autoSave() {
+            if (!currentFilePath) return;
+            const db = await openDB();
+            await db.transaction(STORE_NAME, "readwrite").objectStore(STORE_NAME).put(document.getElementById('codeEditor').value, currentFilePath);
+        }
+
         function applyChanges() {
-            const mode = document.getElementById('modeSelect').value;
-            const content = document.getElementById('codeEditor').value;
+            const blob = new Blob([document.getElementById('codeEditor').value], { type: 'text/html' });
             const frame = document.getElementById('vesselFrame');
-            log(`MODE: ${mode.toUpperCase()} RELOAD`, "#fff");
-            
-            const blob = new Blob([content], { type: 'text/html' });
             if(frame.src.startsWith('blob:')) URL.revokeObjectURL(frame.src);
             frame.src = URL.createObjectURL(blob);
+            log("VIRTUAL REFRESH SUCCESS", "#fff");
         }
 
         async function exportLinuxMirror() {
-            log("PACKAGING SYSTEM IMAGE...", "var(--warn-orange)");
             const db = await openDB();
             const store = db.transaction(STORE_NAME, "readonly").objectStore(STORE_NAME);
             const keys = await new Promise(res => store.getAllKeys().onsuccess = e => res(e.target.result));
             const vals = await new Promise(res => store.getAll().onsuccess = e => res(e.target.result));
-            const data = { version: "26.1", files: {} };
+            const data = { files: {} };
             keys.forEach((k, i) => data.files[k] = vals[i]);
             const link = document.createElement("a");
-            link.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], {type:'text/plain'}));
-            link.download = "NEXUS_SYSTEM_IMAGE.txt";
+            link.href = URL.createObjectURL(new Blob([JSON.stringify(data)], {type:'text/plain'}));
+            link.download = "NEXUS_IMAGE.txt";
             link.click();
-            log("EXPORT COMPLETE.", "#0f0");
         }
 
-        async function importLinuxMirror(input) {
-            log("HARD BOOT INITIATED...", "var(--bully-magenta)");
-            try {
-                const text = await input.files[0].text();
-                const driveData = JSON.parse(text);
-                const db = await openDB();
-                const tx = db.transaction(STORE_NAME, "readwrite");
-                const store = tx.objectStore(STORE_NAME);
-                await store.clear(); 
-                for (const [p, c] of Object.entries(driveData.files)) await store.put(c, p);
-                log(`BOOT SUCCESS: ${Object.keys(driveData.files).length} files re-linked.`, "#0f0");
-                if(driveData.files["app.py"]) {
-                    document.getElementById('codeEditor').value = driveData.files["app.py"];
-                    applyChanges();
-                }
-            } catch (err) { log("BOOT FAILED: Corrupt image.", "red"); }
+        async function importLinuxMirror(i) {
+            const text = await i.files[0].text();
+            const data = JSON.parse(text), db = await openDB();
+            const tx = db.transaction(STORE_NAME, "readwrite");
+            for (const [p, c] of Object.entries(data.files)) await tx.objectStore(STORE_NAME).put(c, p);
+            log("SYSTEM IMAGE RESTORED.", "#0f0");
+            if(data.files["index.html"]) loadFile("index.html", data.files["index.html"]);
         }
 
-        function clearSession() { if(confirm("PURGE VIRTUAL DRIVE?")) location.reload(); }
+        async function deepInstall() {
+            log("INSTALLING CORE LIBS...", "var(--ui-cyan)");
+            const db = await openDB();
+            const libs = ['flask', 'werkzeug', 'jinja2'];
+            for (const lib of libs) {
+                await db.transaction(STORE_NAME, "readwrite").objectStore(STORE_NAME).put(`# ${lib} lib`, `/lib/python3.11/${lib}/__init__.py`);
+                log(`SEALED: ${lib}`, "yellow");
+            }
+        }
+
+        function seedProject() {
+            loadFile('index.html', '<h1>NEXUS V26.5</h1><style>body{background:#000;color:#0f0;display:flex;justify-content:center;align-items:center;height:100vh;}</style>');
+        }
+
+        function clearSession() { if(confirm("WIPE DRIVE?")) location.reload(); }
     </script>
 </body>
 </html>
