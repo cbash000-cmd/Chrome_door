@@ -2,20 +2,32 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ALTHEA | Test Vessel</title>
+    <title>ALTHEA | TEST VESSEL</title>
     <style>
-        body { background: #000; color: #0f0; font-family: monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .status-box { border: 1px solid #0f0; padding: 20px; text-align: center; box-shadow: 0 0 15px #0f0; }
-        .pulse { animation: blink 1.5s infinite; }
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+        body { background: #000; color: #0f0; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: monospace; border: 5px solid #0f0; box-sizing: border-box; }
+        .box { text-align: center; }
+        h1 { font-size: 2.5em; text-shadow: 0 0 10px #0f0; }
     </style>
 </head>
 <body>
-    <div class="status-box">
-        <h1 class="pulse">SYSTEM ACTIVE</h1>
-        <p>Location: /apps/test.html</p>
-        <p>Engine: Chrome PC-Mode</p>
-        <button onclick="window.history.back()" style="background:#0f0; border:none; padding:10px; cursor:pointer;">RETURN TO DOOR</button>
+    <div class="box">
+        <h1>VESSEL: TEST.HTML</h1>
+        <p id="nexus-status">PROTOCOL: INITIALIZING...</p>
     </div>
+
+    <script>
+        // SIGNAL BACK TO ROUTER
+        function signalRouter(message) {
+            if (window.parent) {
+                window.parent.postMessage({type: 'vessel_log', msg: message}, "*");
+            }
+        }
+
+        window.onload = function() {
+            document.getElementById('nexus-status').innerText = "PROTOCOL: ONLINE";
+            signalRouter("Vessel Signature Verified.");
+            signalRouter("Path: /apps/test.html -> SUCCESS");
+        };
+    </script>
 </body>
 </html>
