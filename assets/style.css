@@ -1,0 +1,5 @@
+/* Shared Althea Aesthetic */
+:root { --neon-green: #0f0; --deep-black: #050505; }
+body { background-color: var(--deep-black); color: var(--neon-green); font-family: 'Courier New', Courier, monospace; }
+button { transition: 0.3s; border: 1px solid var(--neon-green); }
+button:hover { background: var(--neon-green); color: black; box-shadow: 0 0 20px var(--neon-green); }
