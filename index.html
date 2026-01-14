@@ -1,11 +1,10 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>ALTHEA NEXUS | V26.5 MAX</title>
+    <title>ALTHEA NEXUS | V26.6 RECOVERY_FIX</title>
     <style>
         :root { --neon-green: #0f0; --dark-bg: #000; --panel-bg: #0a0a0a; --ui-cyan: #0ff; --bully-magenta: #f0f; }
         body { background: var(--dark-bg); color: var(--neon-green); font-family: 'Courier New', monospace; margin: 0; padding: 10px; display: flex; flex-direction: column; height: 100vh; box-sizing: border-box; overflow: hidden; }
@@ -15,10 +14,9 @@
         #cliInput { flex-grow: 1; background: transparent; border: none; color: #fff; font-family: monospace; outline: none; }
         .portal-grid { display: flex; flex-direction: column; gap: 8px; flex-grow: 1; min-height: 0; position: relative; }
         @media (min-width: 601px) { .portal-grid { flex-direction: row; } }
-        .panel { display: flex; flex-direction: column; border: 1px solid #222; background: var(--panel-bg); flex: 1; overflow: hidden; transition: 0.2s; }
+        .panel { display: flex; flex-direction: column; border: 1px solid #222; background: var(--panel-bg); flex: 1; overflow: hidden; }
         .panel.fullscreen { position: fixed !important; inset: 0 !important; z-index: 10000; width: 100vw; height: 100vh; margin: 0; }
         .panel-header { padding: 6px; font-size: 10px; background: #111; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; }
-        .panel-header button { background: transparent; color: var(--neon-green); border: 1px solid var(--neon-green); font-size: 8px; padding: 2px 5px; cursor: pointer; }
         textarea { flex-grow: 1; background: transparent; color: var(--neon-green); border: none; padding: 10px; resize: none; font-size: 11px; outline: none; font-family: 'Courier New', monospace; }
         iframe { flex-grow: 1; background: #fff; border: none; }
         .controls { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-top: 8px; }
@@ -26,47 +24,34 @@
     </style>
 </head>
 <body>
-    <div class="terminal" id="term"><div>[SOVEREIGN_CORE_V26.5] Terminal Ready.</div></div>
+    <div class="terminal" id="term"><div>[EMULATION_ENGINE_V26.6] Ready for Boot.</div></div>
 
     <label id="fileInputLabel">
-        [M] MOUNT & INGEST PHYSICAL FOLDER
+        [M] MOUNT & EMULATE FOLDER
         <input type="file" id="folderPicker" webkitdirectory directory multiple style="display:none" onchange="mountAndIngest(this)">
     </label>
 
     <div class="cli-row">
         <span style="color:var(--ui-cyan)">root@nexus:~#</span>
-        <input type="text" id="cliInput" placeholder="ls | open [file] | clear" onkeydown="if(event.key==='Enter') runCommand(this.value)">
+        <input type="text" id="cliInput" placeholder="ls | open [file]" onkeydown="if(event.key==='Enter') runCommand(this.value)">
     </div>
 
     <div class="portal-grid">
         <div class="panel" id="p1">
-            <div class="panel-header">
-                <span>INSPECTOR: <span id="curFile" style="color:#555">none</span></span>
-                <button onclick="toggleFS('p1')">MAX</button>
-            </div>
+            <div class="panel-header"><span>INSPECTOR: <span id="curFile" style="color:#555">none</span></span><button onclick="toggleFS('p1')" style="background:none;color:var(--neon-green);border:1px solid">MAX</button></div>
             <textarea id="codeEditor" spellcheck="false" oninput="autoSave()"></textarea>
         </div>
         <div class="panel" id="p2">
-            <div class="panel-header">
-                <span>PORTAL: 
-                    <select id="modeSelect" onchange="applyChanges()" style="background:#000; color:var(--neon-green); border:1px solid #333; font-size:9px;">
-                        <option value="html">HTML_MODE</option>
-                        <option value="flask">FLASK_MODE</option>
-                    </select>
-                </span>
-                <button onclick="toggleFS('p2')">MAX</button>
-            </div>
+            <div class="panel-header"><span>PORTAL</span><button onclick="toggleFS('p2')" style="background:none;color:var(--neon-green);border:1px solid">MAX</button></div>
             <iframe id="vesselFrame"></iframe>
         </div>
     </div>
 
     <div class="controls">
-        <div class="btn" onclick="deepInstall()" style="color:var(--ui-cyan)">DEEP_INSTALL</div>
-        <div class="btn" onclick="seedProject()" style="color:var(--bully-magenta)">SEED_STRESS</div>
+        <div class="btn" onclick="seedProject()" style="color:var(--bully-magenta)">STRESS_TEST</div>
         <div class="btn" onclick="applyChanges()">HOT_RELOAD</div>
         <div class="btn" onclick="exportLinuxMirror()" style="color:orange">EXPORT_TXT</div>
         <div class="btn" onclick="document.getElementById('recInput').click()" style="color:#fff">RECOVERY</div>
-        <div class="btn" onclick="clearSession()" style="color:red">PURGE</div>
     </div>
     <input type="file" id="recInput" style="display:none" onchange="importLinuxMirror(this)">
 
@@ -76,38 +61,24 @@
         const log = (m, c="#0f0") => { const d = document.getElementById('term'); d.innerHTML += `<div>> <span style="color:${c}">${m}</span></div>`; d.scrollTop = d.scrollHeight; };
         const openDB = () => new Promise(res => { const r = indexedDB.open(DB_NAME, 1); r.onupgradeneeded = e => e.target.result.createObjectStore(STORE_NAME); r.onsuccess = e => res(e.target.result); });
 
-        function toggleFS(id) {
-            const p = document.getElementById(id);
-            const isFull = p.classList.toggle('fullscreen');
-            p.querySelector('button').innerText = isFull ? 'EXIT' : 'MAX';
-        }
+        function toggleFS(id) { const p = document.getElementById(id); p.classList.toggle('fullscreen'); }
 
         async function mountAndIngest(input) {
             const files = input.files;
             const db = await openDB();
             let count = 0;
             for (const f of files) {
-                if (f.name.match(/\.(html|css|js|py)$/)) {
+                if (f.name.match(/\.(html|css|js|py|txt)$/)) {
                     const content = await f.text();
                     await db.transaction(STORE_NAME, "readwrite").objectStore(STORE_NAME).put(content, f.name);
                     count++;
-                    if (f.name === 'index.html' || f.name === 'app.py') loadFile(f.name, content);
+                    // AUTO-BOOT priority: index.html -> app.py -> althea.py
+                    if (f.name.toLowerCase().includes('index.html') || f.name.toLowerCase().includes('althea')) {
+                        loadFile(f.name, content);
+                    }
                 }
             }
-            log(`INGESTED ${count} FILES. Use 'ls' to view.`, "#0f0");
-        }
-
-        async function runCommand(v) {
-            const [cmd, arg] = v.split(' ');
-            const db = await openDB();
-            if (cmd === 'ls') {
-                const keys = await new Promise(res => db.transaction(STORE_NAME).objectStore(STORE_NAME).getAllKeys().onsuccess = e => res(e.target.result));
-                log("DRIVE: " + (keys.join(', ') || 'EMPTY'), "white");
-            } else if (cmd === 'open' && arg) {
-                const req = db.transaction(STORE_NAME).objectStore(STORE_NAME).get(arg);
-                req.onsuccess = () => req.result ? loadFile(arg, req.result) : log("FILE NOT FOUND", "red");
-            } else if (cmd === 'clear') { document.getElementById('term').innerHTML = ''; }
-            document.getElementById('cliInput').value = '';
+            log(`INGESTED ${count} ASSETS. Portal Active.`, "#0f0");
         }
 
         function loadFile(name, content) {
@@ -117,6 +88,19 @@
             applyChanges();
         }
 
+        async function runCommand(v) {
+            const [cmd, arg] = v.split(' ');
+            const db = await openDB();
+            if (cmd === 'ls') {
+                const keys = await new Promise(res => db.transaction(STORE_NAME).objectStore(STORE_NAME).getAllKeys().onsuccess = e => res(e.target.result));
+                log("FILES: " + (keys.join(', ') || 'EMPTY'), "white");
+            } else if (cmd === 'open' && arg) {
+                const req = db.transaction(STORE_NAME).objectStore(STORE_NAME).get(arg);
+                req.onsuccess = () => req.result ? loadFile(arg, req.result) : log("NOT FOUND", "red");
+            }
+            document.getElementById('cliInput').value = '';
+        }
+
         async function autoSave() {
             if (!currentFilePath) return;
             const db = await openDB();
@@ -124,11 +108,12 @@
         }
 
         function applyChanges() {
-            const blob = new Blob([document.getElementById('codeEditor').value], { type: 'text/html' });
+            const code = document.getElementById('codeEditor').value;
             const frame = document.getElementById('vesselFrame');
+            const blob = new Blob([code], { type: 'text/html' });
             if(frame.src.startsWith('blob:')) URL.revokeObjectURL(frame.src);
             frame.src = URL.createObjectURL(blob);
-            log("VIRTUAL REFRESH SUCCESS", "#fff");
+            log("EMULATION REFRESHED.", "white");
         }
 
         async function exportLinuxMirror() {
@@ -145,29 +130,22 @@
         }
 
         async function importLinuxMirror(i) {
-            const text = await i.files[0].text();
-            const data = JSON.parse(text), db = await openDB();
-            const tx = db.transaction(STORE_NAME, "readwrite");
-            for (const [p, c] of Object.entries(data.files)) await tx.objectStore(STORE_NAME).put(c, p);
-            log("SYSTEM IMAGE RESTORED.", "#0f0");
-            if(data.files["index.html"]) loadFile("index.html", data.files["index.html"]);
+            log("DECODING IMAGE...", "var(--ui-cyan)");
+            try {
+                const text = await i.files[0].text();
+                const data = JSON.parse(text), db = await openDB();
+                const tx = db.transaction(STORE_NAME, "readwrite");
+                await tx.objectStore(STORE_NAME).clear();
+                for (const [p, c] of Object.entries(data.files)) await tx.objectStore(STORE_NAME).put(c, p);
+                
+                // BOOT TRIGGER
+                const bootKey = Object.keys(data.files).find(k => k.toLowerCase().includes('html')) || Object.keys(data.files)[0];
+                loadFile(bootKey, data.files[bootKey]);
+                log("IMAGE BOOTED.", "#0f0");
+            } catch (e) { log("IO ERROR", "red"); }
         }
 
-        async function deepInstall() {
-            log("INSTALLING CORE LIBS...", "var(--ui-cyan)");
-            const db = await openDB();
-            const libs = ['flask', 'werkzeug', 'jinja2'];
-            for (const lib of libs) {
-                await db.transaction(STORE_NAME, "readwrite").objectStore(STORE_NAME).put(`# ${lib} lib`, `/lib/python3.11/${lib}/__init__.py`);
-                log(`SEALED: ${lib}`, "yellow");
-            }
-        }
-
-        function seedProject() {
-            loadFile('index.html', '<h1>NEXUS V26.5</h1><style>body{background:#000;color:#0f0;display:flex;justify-content:center;align-items:center;height:100vh;}</style>');
-        }
-
-        function clearSession() { if(confirm("WIPE DRIVE?")) location.reload(); }
+        function seedProject() { loadFile('test.html', '<h1>NEXUS V26.6</h1><style>body{background:#000;color:#0f0;display:flex;justify-content:center;align-items:center;height:100vh;}</style>'); }
     </script>
 </body>
 </html>
