@@ -6,155 +6,141 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="nexus-icon.png">
-    
-    <title>ALTHEA NEXUS | V25.7</title>
+    <title>ALTHEA NEXUS | V25.8 PRO</title>
     <style>
-        :root { --neon-green: #0f0; --dark-bg: #000; --panel-bg: #0a0a0a; --ui-cyan: #0ff; --bully-magenta: #f0f; }
+        :root { --neon-green: #0f0; --dark-bg: #000; --panel-bg: #0a0a0a; --ui-cyan: #0ff; --bully-magenta: #f0f; --warn-orange: #ffa500; }
         body { background: var(--dark-bg); color: var(--neon-green); font-family: 'Courier New', monospace; margin: 0; padding: 10px; display: flex; flex-direction: column; height: 100vh; box-sizing: border-box; overflow: hidden; }
-        
-        .terminal { background: #050505; border: 1px solid #333; height: 120px; overflow-y: auto; padding: 8px; font-size: 11px; margin-bottom: 8px; box-shadow: inset 0 0 10px #000; }
+        .terminal { background: #050505; border: 1px solid #333; height: 140px; overflow-y: auto; padding: 8px; font-size: 10px; margin-bottom: 8px; box-shadow: inset 0 0 10px #000; border-left: 3px solid var(--neon-green); }
         .status-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 10px; border-bottom: 1px solid #222; padding-bottom: 5px; }
-        #statusLight { width: 10px; height: 10px; border-radius: 50%; background: #300; box-shadow: 0 0 5px #f00; }
-
+        #statusLight { width: 10px; height: 10px; border-radius: 50%; background: #300; box-shadow: 0 0 5px #f00; transition: 0.3s; }
         .portal-grid { display: flex; flex-direction: column; gap: 8px; flex-grow: 1; min-height: 0; }
         @media (min-width: 601px) { .portal-grid { flex-direction: row; } }
-
         .panel { display: flex; flex-direction: column; border: 1px solid #222; background: var(--panel-bg); position: relative; flex: 1; overflow: hidden; }
         .panel.fullscreen { position: fixed !important; inset: 0 !important; z-index: 10000; width: 100vw; height: 100vh; margin: 0; }
-
         .panel-header { padding: 6px; font-size: 10px; background: #111; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; }
         .panel-header button { background: transparent; color: var(--neon-green); border: 1px solid var(--neon-green); font-size: 9px; padding: 2px 5px; cursor: pointer; }
-
-        textarea { flex-grow: 1; background: transparent; color: var(--neon-green); border: none; padding: 10px; resize: none; font-size: 11px; outline: none; width: 100%; font-family: 'Courier New', monospace; }
+        textarea { flex-grow: 1; background: transparent; color: var(--neon-green); border: none; padding: 10px; resize: none; font-size: 11px; outline: none; width: 100%; font-family: 'Courier New', monospace; line-height: 1.4; }
         iframe { flex-grow: 1; background: #fff; border: none; width: 100%; }
-        
-        #vesselHistory { height: 50px; background: #050505; border: 1px solid #222; overflow-y: auto; font-size: 10px; color: #555; padding: 5px; margin-top: 5px; }
-
+        #vesselHistory { height: 40px; background: #050505; border: 1px solid #222; overflow-y: auto; font-size: 9px; color: #555; padding: 5px; margin-top: 5px; }
         .controls { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-top: 8px; }
-        .btn { background: #111; color: var(--neon-green); border: 1px solid var(--neon-green); padding: 10px 2px; cursor: pointer; font-size: 9px; font-weight: bold; text-align: center; text-transform: uppercase; }
+        .btn { background: #111; color: var(--neon-green); border: 1px solid var(--neon-green); padding: 10px 2px; cursor: pointer; font-size: 8px; font-weight: bold; text-align: center; text-transform: uppercase; }
         .btn:active { background: var(--neon-green); color: #000; }
-        
-        #fileInputLabel { background: #111; color: var(--ui-cyan); border: 1px dashed var(--ui-cyan); text-align: center; padding: 10px; cursor: pointer; font-size: 11px; margin-bottom: 8px; display: block; }
+        #fileInputLabel { background: #111; color: var(--ui-cyan); border: 1px dashed var(--ui-cyan); text-align: center; padding: 10px; cursor: pointer; font-size: 10px; margin-bottom: 8px; display: block; }
     </style>
 </head>
 <body>
     <div class="status-row">
         <div id="statusLight"></div>
-        <span id="statusText">ALTHEA NEXUS V25.7: SILENT_MODE</span>
+        <span id="statusText">ALTHEA NEXUS V25.8: SOVEREIGN_NODE</span>
     </div>
 
-    <div class="terminal" id="term"><div>[CORE INITIALIZED - AWAITING WAKE]</div></div>
+    <div class="terminal" id="term"><div>[LINUX KERNEL SIMULATION ACTIVE]</div></div>
 
-    <label id="fileInputLabel" onclick="log('READY FOR SCAN...')">
-        [+] SCAN LOCAL VESSEL (SINGLE FILE)
-        <input type="file" id="fileInput" style="display:none" onchange="loadVessel(this)">
+    <label id="fileInputLabel">
+        [M] MOUNT PHYSICAL FOLDER IDENTITY (WEBKIT)
+        <input type="file" id="folderPicker" webkitdirectory directory multiple style="display:none" onchange="bullyMirror(this)">
     </label>
 
     <div class="portal-grid" id="masterGrid">
         <div class="panel" id="inspectorPanel">
             <div class="panel-header">
-                <span>CODE INSPECTOR</span>
-                <div><span id="fileName" style="color:#555">idle.sys</span> <button onclick="toggleFullscreen(this)">MAX</button></div>
+                <span>SYSTEM_INSPECTOR</span>
+                <div><span id="fileName" style="color:#555">boot.log</span> <button onclick="toggleFullscreen(this)">MAX</button></div>
             </div>
-            <textarea id="codeEditor" spellcheck="false" placeholder="Root directory empty..."></textarea>
+            <textarea id="codeEditor" spellcheck="false" placeholder="Awaiting Virtual Root access..."></textarea>
         </div>
         <div class="panel" id="portalPanel">
             <div class="panel-header">
-                <span>PORTAL VIEW (EMULATOR)</span>
+                <span>PORTAL_VIEW (FLASK_RUNTIME)</span>
                 <div><span id="fpsCounter" style="color:#555">0 FPS</span> <button onclick="toggleFullscreen(this)">MAX</button></div>
             </div>
             <iframe id="vesselFrame" sandbox="allow-scripts allow-forms allow-modals"></iframe>
         </div>
     </div>
 
-    <div id="vesselHistory"><div>* WAITING FOR DIRECTORY MOUNT *</div></div>
+    <div id="vesselHistory"><div>* SYSTEM STABLE *</div></div>
 
     <div class="controls">
-        <div class="btn" onclick="applyChanges()">APPLY</div>
-        <div class="btn" onclick="nexusInstallCore()" style="color:var(--ui-cyan); border-color:var(--ui-cyan);">BULLY_INSTALL</div>
-        <div class="btn" onclick="wakeFlask()" style="color:var(--bully-magenta); border-color:var(--bully-magenta);">WAKE_FLASK</div>
-        <div class="btn" onclick="clearSession()" style="color:#f00; border-color:#f00;">PURGE</div>
+        <div class="btn" onclick="deepInstall()" style="color:var(--ui-cyan);">DEEP_INSTALL</div>
+        <div class="btn" onclick="seedProject()" style="color:white; background:#303;">SEED_STRESS</div>
+        <div class="btn" onclick="wakeFlask()" style="color:var(--bully-magenta);">WAKE_FLASK</div>
+        <div class="btn" onclick="exportLinuxMirror()" style="color:var(--warn-orange);">EXPORT_OS</div>
+        <div class="btn" onclick="document.getElementById('recoveryInput').click()" style="color:#fff;">LOAD_RECOVERY</div>
+        <div class="btn" onclick="applyChanges()">HOT_RELOAD</div>
+        <div class="btn" onclick="clearSession()" style="color:#f00;">PURGE</div>
     </div>
+    <input type="file" id="recoveryInput" style="display:none" onchange="importLinuxMirror(this)">
 
     <script>
-        const log = (m, c="#0f0") => { 
-            const d = document.getElementById('term'); 
-            d.innerHTML += `<div>> <span style="color:${c}">${m}</span></div>`; 
-            d.scrollTop = d.scrollHeight; 
-        };
-
-        // --- THE BULLY INSTALLER (LINUX LOGIC) ---
+        const DB_NAME = "NexusFS", STORE_NAME = "files";
         const CORE_LIBS = [
             { name: 'flask', repo: 'pallets/flask', path: 'src/flask' },
             { name: 'werkzeug', repo: 'pallets/werkzeug', path: 'src/werkzeug' },
-            { name: 'jinja2', repo: 'pallets/jinja', path: 'src/jinja2' }
+            { name: 'jinja2', repo: 'pallets/jinja', path: 'src/jinja2' },
+            { name: 'click', repo: 'pallets/click', path: 'src/click' },
+            { name: 'itsdangerous', repo: 'pallets/itsdangerous', path: 'src/itsdangerous' },
+            { name: 'markupsafe', repo: 'pallets/markupsafe', path: 'src/markupsafe' }
         ];
 
-        async function nexusInstallCore() {
-            try {
-                log("INITIATING LINUX-STYLE PROVISIONING...", "var(--ui-cyan)");
-                const rootHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
-                
-                // Create Pythonic Structure
-                const libDir = await rootHandle.getDirectoryHandle("lib", { create: true });
-                const pyDir = await libDir.getDirectoryHandle("python3.11", { create: true });
-                const sitePkgs = await pyDir.getDirectoryHandle("site-packages", { create: true });
+        const log = (m, c="#0f0") => { 
+            const d = document.getElementById('term'); 
+            d.innerHTML += `<div><span style="color:#444">[${new Date().toLocaleTimeString()}]</span> > <span style="color:${c}">${m}</span></div>`; 
+            d.scrollTop = d.scrollHeight; 
+        };
 
-                for (const lib of CORE_LIBS) {
-                    log(`Infecting: ${lib.name}...`, "yellow");
-                    const libDirHandle = await sitePkgs.getDirectoryHandle(lib.name, { create: true });
-                    
-                    const url = `https://raw.githubusercontent.com/${lib.repo}/main/${lib.path}/__init__.py`;
+        const openDB = () => new Promise((res, rej) => {
+            const req = indexedDB.open(DB_NAME, 1);
+            req.onupgradeneeded = (e) => e.target.result.createObjectStore(STORE_NAME);
+            req.onsuccess = (e) => res(e.target.result);
+            req.onerror = (e) => rej(e.target.error);
+        });
+
+        async function bullyMirror(input) {
+            const rootName = input.files[0].webkitRelativePath.split('/')[0];
+            log(`Faking directory: /On My iPhone/${rootName}`, "var(--ui-cyan)");
+            addToHistory(rootName, "MOUNTED");
+        }
+
+        async function deepInstall() {
+            log("INITIATING DEEP-STACK INJECTION...", "var(--ui-cyan)");
+            const db = await openDB();
+            for (const lib of CORE_LIBS) {
+                log(`Bullying ${lib.name}...`, "yellow");
+                const url = `https://raw.githubusercontent.com/${lib.repo}/main/${lib.path}/__init__.py`;
+                try {
                     const resp = await fetch(url);
                     const content = await resp.text();
-                    
-                    const fileHandle = await libDirHandle.getFileHandle("__init__.py", { create: true });
-                    const writable = await fileHandle.createWritable();
-                    await writable.write(content);
-                    await writable.close();
-                    log(`[+] ${lib.name} cached to local storage.`, "#0f0");
-                }
-                log("CORE LIBS SEALED IN IPHONE FOLDER.", "#0f0");
-                addToHistory("SYSTEM", "PROVISIONED");
-            } catch (err) {
-                log("MOUNT FAILED: " + err.message, "#f00");
+                    const tx = db.transaction(STORE_NAME, "readwrite");
+                    await tx.objectStore(STORE_NAME).put(content, `/lib/python3.11/site-packages/${lib.name}/__init__.py`);
+                } catch(e) { log(`FAILED: ${lib.name}`, "red"); }
             }
+            log("ALL CORE DEPS SEALED.", "#0f0");
         }
 
-        // --- THE BOOTLOADER (WAKE FLASK) ---
+        async function seedProject() {
+            const code = `<!DOCTYPE html><body style="background:#000;display:flex;justify-content:center;align-items:center;height:100vh;overflow:hidden;"><script>for(let i=0;i<50;i++){const r=document.createElement('div');r.style="position:absolute;border:2px solid #0f0;border-radius:50%;width:"+(50+i*5)+"px;height:"+(50+i*5)+"px;box-shadow:0 0 10px #0f0;animation:p 2s infinite "+(i*0.1)+"s";document.body.appendChild(r);}document.write('<style>@keyframes p{0%,100%{opacity:0.3;transform:scale(1)}50%{opacity:1;transform:scale(1.1)}}</style><div style="color:#0f0;font-family:monospace;z-index:10;background:#000;padding:10px;">FLASK ENGINE: 50 RINGS ACTIVE</div>')<\/script></body>`;
+            const db = await openDB();
+            const tx = db.transaction(STORE_NAME, "readwrite");
+            await tx.objectStore(STORE_NAME).put(code, "app.py");
+            log("SEEDING: app.py (Stress Test) written.", "var(--bully-magenta)");
+            wakeFlask();
+        }
+
         async function wakeFlask() {
-            try {
-                log("MOUNTING BOOT DIRECTORY...", "var(--bully-magenta)");
-                const rootHandle = await window.showDirectoryPicker();
-                const fileHandle = await rootHandle.getFileHandle("app.py");
-                const file = await fileHandle.getFile();
-                const content = await file.text();
-
-                document.getElementById('codeEditor').value = content;
-                document.getElementById('fileName').innerText = "app.py [LOCAL]";
-                applyChanges();
-
-                log("FLASK ENGINE WOKEN FROM LOCAL STORAGE", "#0f0");
-                document.getElementById('statusLight').style.background = 'var(--bully-magenta)';
-                document.getElementById('statusLight').style.boxShadow = '0 0 10px var(--bully-magenta)';
-                document.getElementById('statusText').innerText = "NEXUS: FLASK_ACTIVE";
-            } catch (err) {
-                log("WAKE ERROR: Ensure 'app.py' exists in folder.", "#f00");
-            }
-        }
-
-        // --- EMULATOR CORE LOGIC ---
-        function loadVessel(input) {
-            const file = input.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                document.getElementById('codeEditor').value = e.target.result;
-                document.getElementById('fileName').innerText = file.name;
-                applyChanges();
-                addToHistory(file.name, "LOADED");
+            log("BOOTING FROM VIRTUAL DRIVE...", "var(--bully-magenta)");
+            const db = await openDB();
+            const tx = db.transaction(STORE_NAME, "readonly");
+            const req = tx.objectStore(STORE_NAME).get("app.py");
+            req.onsuccess = () => {
+                if (req.result) {
+                    document.getElementById('codeEditor').value = req.result;
+                    document.getElementById('fileName').innerText = "app.py [VIRTUAL]";
+                    applyChanges();
+                    log("GET / HTTP/1.1 200 OK", "var(--ui-cyan)");
+                    document.getElementById('statusLight').style.background = 'var(--bully-magenta)';
+                    document.getElementById('statusLight').style.boxShadow = '0 0 10px var(--bully-magenta)';
+                } else { log("ERROR: No app.py found. Click SEED first.", "red"); }
             };
-            reader.readAsText(file);
         }
 
         function applyChanges() {
@@ -163,7 +149,33 @@
             const frame = document.getElementById('vesselFrame');
             if(frame.src.startsWith('blob:')) URL.revokeObjectURL(frame.src);
             frame.src = URL.createObjectURL(blob);
-            log("Nexus Injection: Success.");
+            log("POST /reload HTTP/1.1 204 No Content", "white");
+        }
+
+        async function exportLinuxMirror() {
+            log("SNAPSHOT INITIATED...", "var(--warn-orange)");
+            const db = await openDB();
+            const store = db.transaction(STORE_NAME, "readonly").objectStore(STORE_NAME);
+            const files = {}, keys = await new Promise(res => store.getAllKeys().onsuccess = e => res(e.target.result));
+            const vals = await new Promise(res => store.getAll().onsuccess = e => res(e.target.result));
+            keys.forEach((k, i) => files[k] = vals[i]);
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(new Blob([JSON.stringify(files)], {type:'application/json'}));
+            link.download = `NEXUS_DRIVE_${Date.now()}.json`;
+            link.click();
+            log("EXPORT COMPLETE: Save to Files app.", "#0f0");
+        }
+
+        async function importLinuxMirror(input) {
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const data = JSON.parse(e.target.result), db = await openDB();
+                const tx = db.transaction(STORE_NAME, "readwrite");
+                for (const [p, c] of Object.entries(data)) await tx.objectStore(STORE_NAME).put(c, p);
+                log("DRIVE RESTORED.", "#0f0");
+                if(data["app.py"]) wakeFlask();
+            };
+            reader.readAsText(input.files[0]);
         }
 
         function toggleFullscreen(btn) {
@@ -172,16 +184,12 @@
             btn.innerText = isFull ? 'EXIT' : 'MAX';
         }
 
-        function addToHistory(name, status) {
+        function addToHistory(n, s) {
             const h = document.getElementById('vesselHistory');
-            const entry = document.createElement('div');
-            entry.innerHTML = `<span style="color:#333">[${new Date().toLocaleTimeString()}]</span> ${name} : ${status}`;
-            h.insertBefore(entry, h.firstChild);
+            h.innerHTML = `<div>[${new Date().toLocaleTimeString()}] ${n} : ${s}</div>` + h.innerHTML;
         }
 
-        function clearSession() {
-            if (confirm("PURGE ALL CACHE?")) location.reload();
-        }
+        function clearSession() { if (confirm("PURGE SYSTEM?")) location.reload(); }
     </script>
 </body>
 </html>
