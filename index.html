@@ -9,50 +9,44 @@
     
     <title>ALTHEA NEXUS | V25.7</title>
     <style>
-        :root { --neon-green: #0f0; --dark-bg: #000; --panel-bg: #0a0a0a; --ui-cyan: #0ff; }
+        :root { --neon-green: #0f0; --dark-bg: #000; --panel-bg: #0a0a0a; --ui-cyan: #0ff; --bully-magenta: #f0f; }
         body { background: var(--dark-bg); color: var(--neon-green); font-family: 'Courier New', monospace; margin: 0; padding: 10px; display: flex; flex-direction: column; height: 100vh; box-sizing: border-box; overflow: hidden; }
         
-        /* iOS Scroll Lock */
-        body.locked { overflow: hidden; position: fixed; width: 100%; }
-
-        .terminal { background: #050505; border: 1px solid #333; height: 100px; overflow-y: auto; padding: 8px; font-size: 11px; margin-bottom: 8px; }
-        .status-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 10px; }
-        #statusLight { width: 10px; height: 10px; border-radius: 50%; background: #300; transition: 0.3s; }
+        .terminal { background: #050505; border: 1px solid #333; height: 120px; overflow-y: auto; padding: 8px; font-size: 11px; margin-bottom: 8px; box-shadow: inset 0 0 10px #000; }
+        .status-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 10px; border-bottom: 1px solid #222; padding-bottom: 5px; }
+        #statusLight { width: 10px; height: 10px; border-radius: 50%; background: #300; box-shadow: 0 0 5px #f00; }
 
         .portal-grid { display: flex; flex-direction: column; gap: 8px; flex-grow: 1; min-height: 0; }
         @media (min-width: 601px) { .portal-grid { flex-direction: row; } }
 
-        .panel { display: flex; flex-direction: column; border: 1px solid #222; background: var(--panel-bg); position: relative; flex: 1; order: 0; overflow: hidden; }
-        
-        /* Fullscreen Focus */
-        .panel.fullscreen { position: fixed !important; inset: 0 !important; z-index: 10000 !important; width: 100vw !important; height: 100vh !important; margin: 0 !important; border: none; }
+        .panel { display: flex; flex-direction: column; border: 1px solid #222; background: var(--panel-bg); position: relative; flex: 1; overflow: hidden; }
+        .panel.fullscreen { position: fixed !important; inset: 0 !important; z-index: 10000; width: 100vw; height: 100vh; margin: 0; }
 
         .panel-header { padding: 6px; font-size: 10px; background: #111; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; }
         .panel-header button { background: transparent; color: var(--neon-green); border: 1px solid var(--neon-green); font-size: 9px; padding: 2px 5px; cursor: pointer; }
 
-        textarea { flex-grow: 1; background: transparent; color: var(--neon-green); border: none; padding: 10px; resize: none; font-size: 11px; outline: none; width: 100%; }
+        textarea { flex-grow: 1; background: transparent; color: var(--neon-green); border: none; padding: 10px; resize: none; font-size: 11px; outline: none; width: 100%; font-family: 'Courier New', monospace; }
         iframe { flex-grow: 1; background: #fff; border: none; width: 100%; }
         
         #vesselHistory { height: 50px; background: #050505; border: 1px solid #222; overflow-y: auto; font-size: 10px; color: #555; padding: 5px; margin-top: 5px; }
 
-        .controls { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-top: 8px; }
-        .btn { background: #111; color: var(--neon-green); border: 1px solid var(--neon-green); padding: 8px 2px; cursor: pointer; font-size: 9px; font-weight: bold; text-align: center; }
+        .controls { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-top: 8px; }
+        .btn { background: #111; color: var(--neon-green); border: 1px solid var(--neon-green); padding: 10px 2px; cursor: pointer; font-size: 9px; font-weight: bold; text-align: center; text-transform: uppercase; }
+        .btn:active { background: var(--neon-green); color: #000; }
         
-        #fileInputLabel { background: #111; color: var(--ui-cyan); border: 1px dashed var(--ui-cyan); text-align: center; padding: 10px; cursor: pointer; font-size: 11px; margin-bottom: 8px; }
-
-        @media (max-width: 600px) { .controls { grid-template-columns: repeat(3, 1fr); } }
+        #fileInputLabel { background: #111; color: var(--ui-cyan); border: 1px dashed var(--ui-cyan); text-align: center; padding: 10px; cursor: pointer; font-size: 11px; margin-bottom: 8px; display: block; }
     </style>
 </head>
 <body>
     <div class="status-row">
         <div id="statusLight"></div>
-        <span id="statusText">ALTHEA V25.7: ACTIVE</span>
+        <span id="statusText">ALTHEA NEXUS V25.7: SILENT_MODE</span>
     </div>
 
-    <div class="terminal" id="term"><div>[NEXUS STABILIZED]</div></div>
+    <div class="terminal" id="term"><div>[CORE INITIALIZED - AWAITING WAKE]</div></div>
 
-    <label id="fileInputLabel">
-        [+] SCAN LOCAL VESSEL
+    <label id="fileInputLabel" onclick="log('READY FOR SCAN...')">
+        [+] SCAN LOCAL VESSEL (SINGLE FILE)
         <input type="file" id="fileInput" style="display:none" onchange="loadVessel(this)">
     </label>
 
@@ -60,26 +54,25 @@
         <div class="panel" id="inspectorPanel">
             <div class="panel-header">
                 <span>CODE INSPECTOR</span>
-                <div><span id="fileName" style="color:#555">---</span><button onclick="toggleFullscreen(this)">MAX</button></div>
+                <div><span id="fileName" style="color:#555">idle.sys</span> <button onclick="toggleFullscreen(this)">MAX</button></div>
             </div>
-            <textarea id="codeEditor" spellcheck="false" placeholder="Awaiting manifest..."></textarea>
+            <textarea id="codeEditor" spellcheck="false" placeholder="Root directory empty..."></textarea>
         </div>
         <div class="panel" id="portalPanel">
             <div class="panel-header">
-                <span>PORTAL VIEW</span>
-                <div><span id="fpsCounter" style="color:#555">WAITING</span><button onclick="toggleFullscreen(this)">MAX</button></div>
+                <span>PORTAL VIEW (EMULATOR)</span>
+                <div><span id="fpsCounter" style="color:#555">0 FPS</span> <button onclick="toggleFullscreen(this)">MAX</button></div>
             </div>
             <iframe id="vesselFrame" sandbox="allow-scripts allow-forms allow-modals"></iframe>
         </div>
     </div>
 
-    <div id="vesselHistory"><div>* SESSION READY *</div></div>
+    <div id="vesselHistory"><div>* WAITING FOR DIRECTORY MOUNT *</div></div>
 
     <div class="controls">
         <div class="btn" onclick="applyChanges()">APPLY</div>
-        <div class="btn" onclick="saveFile()">SAVE</div>
-        <div class="btn" onclick="swapPanels()">SWAP</div>
-        <div class="btn" onclick="requestSnapshot()" style="color:orange; border-color:orange;">SNAP</div>
+        <div class="btn" onclick="nexusInstallCore()" style="color:var(--ui-cyan); border-color:var(--ui-cyan);">BULLY_INSTALL</div>
+        <div class="btn" onclick="wakeFlask()" style="color:var(--bully-magenta); border-color:var(--bully-magenta);">WAKE_FLASK</div>
         <div class="btn" onclick="clearSession()" style="color:#f00; border-color:#f00;">PURGE</div>
     </div>
 
@@ -90,15 +83,67 @@
             d.scrollTop = d.scrollHeight; 
         };
 
-        let isSwapped = false;
+        // --- THE BULLY INSTALLER (LINUX LOGIC) ---
+        const CORE_LIBS = [
+            { name: 'flask', repo: 'pallets/flask', path: 'src/flask' },
+            { name: 'werkzeug', repo: 'pallets/werkzeug', path: 'src/werkzeug' },
+            { name: 'jinja2', repo: 'pallets/jinja', path: 'src/jinja2' }
+        ];
 
-        window.addEventListener('message', (e) => {
-            if (e.data.type === 'vessel_log') {
-                log(`[VESSEL]: ${e.data.msg}`, "#0ff");
-                if(e.data.msg.includes("fps")) document.getElementById('fpsCounter').innerText = e.data.msg;
+        async function nexusInstallCore() {
+            try {
+                log("INITIATING LINUX-STYLE PROVISIONING...", "var(--ui-cyan)");
+                const rootHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+                
+                // Create Pythonic Structure
+                const libDir = await rootHandle.getDirectoryHandle("lib", { create: true });
+                const pyDir = await libDir.getDirectoryHandle("python3.11", { create: true });
+                const sitePkgs = await pyDir.getDirectoryHandle("site-packages", { create: true });
+
+                for (const lib of CORE_LIBS) {
+                    log(`Infecting: ${lib.name}...`, "yellow");
+                    const libDirHandle = await sitePkgs.getDirectoryHandle(lib.name, { create: true });
+                    
+                    const url = `https://raw.githubusercontent.com/${lib.repo}/main/${lib.path}/__init__.py`;
+                    const resp = await fetch(url);
+                    const content = await resp.text();
+                    
+                    const fileHandle = await libDirHandle.getFileHandle("__init__.py", { create: true });
+                    const writable = await fileHandle.createWritable();
+                    await writable.write(content);
+                    await writable.close();
+                    log(`[+] ${lib.name} cached to local storage.`, "#0f0");
+                }
+                log("CORE LIBS SEALED IN IPHONE FOLDER.", "#0f0");
+                addToHistory("SYSTEM", "PROVISIONED");
+            } catch (err) {
+                log("MOUNT FAILED: " + err.message, "#f00");
             }
-        });
+        }
 
+        // --- THE BOOTLOADER (WAKE FLASK) ---
+        async function wakeFlask() {
+            try {
+                log("MOUNTING BOOT DIRECTORY...", "var(--bully-magenta)");
+                const rootHandle = await window.showDirectoryPicker();
+                const fileHandle = await rootHandle.getFileHandle("app.py");
+                const file = await fileHandle.getFile();
+                const content = await file.text();
+
+                document.getElementById('codeEditor').value = content;
+                document.getElementById('fileName').innerText = "app.py [LOCAL]";
+                applyChanges();
+
+                log("FLASK ENGINE WOKEN FROM LOCAL STORAGE", "#0f0");
+                document.getElementById('statusLight').style.background = 'var(--bully-magenta)';
+                document.getElementById('statusLight').style.boxShadow = '0 0 10px var(--bully-magenta)';
+                document.getElementById('statusText').innerText = "NEXUS: FLASK_ACTIVE";
+            } catch (err) {
+                log("WAKE ERROR: Ensure 'app.py' exists in folder.", "#f00");
+            }
+        }
+
+        // --- EMULATOR CORE LOGIC ---
         function loadVessel(input) {
             const file = input.files[0];
             if (!file) return;
@@ -118,59 +163,24 @@
             const frame = document.getElementById('vesselFrame');
             if(frame.src.startsWith('blob:')) URL.revokeObjectURL(frame.src);
             frame.src = URL.createObjectURL(blob);
-            document.getElementById('statusLight').style.background = 'var(--neon-green)';
-            document.getElementById('statusText').innerText = "ONLINE";
-            log("Injection complete.");
+            log("Nexus Injection: Success.");
         }
 
         function toggleFullscreen(btn) {
             const panel = btn.closest('.panel');
-            
-            document.querySelectorAll('.panel.fullscreen').forEach(p => {
-                if (p !== panel) {
-                    p.classList.remove('fullscreen');
-                    p.querySelector('.panel-header button').innerText = 'MAX';
-                }
-            });
-
             const isFull = panel.classList.toggle('fullscreen');
-            document.body.classList.toggle('locked', isFull); // Fix iOS bounce
             btn.innerText = isFull ? 'EXIT' : 'MAX';
-            log(`UI: ${panel.id} ${isFull ? 'MAXIMIZED' : 'GRID'}`);
-        }
-
-        function swapPanels() {
-            isSwapped = !isSwapped;
-            document.getElementById('inspectorPanel').style.order = isSwapped ? "2" : "1";
-            document.getElementById('portalPanel').style.order = isSwapped ? "1" : "2";
-            log(`UI: Orientation SWAP ${isSwapped ? 'ACTIVE' : 'DEFAULT'}`);
         }
 
         function addToHistory(name, status) {
             const h = document.getElementById('vesselHistory');
-            if (h.innerText.includes("SESSION READY")) h.innerHTML = "";
             const entry = document.createElement('div');
             entry.innerHTML = `<span style="color:#333">[${new Date().toLocaleTimeString()}]</span> ${name} : ${status}`;
             h.insertBefore(entry, h.firstChild);
         }
 
-        function requestSnapshot() {
-            log("Capturing frame...");
-            document.getElementById('vesselFrame').contentWindow.postMessage({ type: 'SNAPSHOT_REQUEST' }, '*');
-        }
-
-        function saveFile() {
-            const content = document.getElementById('codeEditor').value;
-            const blob = new Blob([content], { type: 'text/html' });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = "NEXUS_" + document.getElementById('fileName').innerText;
-            link.click();
-            addToHistory(document.getElementById('fileName').innerText, "SAVED");
-        }
-
         function clearSession() {
-            if (confirm("PURGE SESSION?")) location.reload();
+            if (confirm("PURGE ALL CACHE?")) location.reload();
         }
     </script>
 </body>
