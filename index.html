@@ -3,70 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ALTHEA | UNIVERSAL BRIDGE</title>
+    <title>ALTHEA | V23.0 DEPLOYMENT</title>
     <style>
-        body { background: #000; color: #0f0; font-family: 'Courier New', monospace; padding: 20px; }
-        .terminal { background: #050505; border: 1px solid #333; height: 200px; overflow-y: auto; padding: 10px; margin-bottom: 20px; font-size: 0.8em; }
-        .uplink-zone { border: 2px dashed #0f0; padding: 30px; text-align: center; border-radius: 10px; cursor: pointer; display: block; margin-bottom: 10px; }
-        .toggle-btn { background: #111; color: #0f0; border: 1px solid #0f0; padding: 10px; width: 100%; cursor: pointer; font-weight: bold; }
-        .toggle-btn.active { background: #0f0; color: #000; }
-        .cmd { color: #555; }
+        body { background: #000; color: #0f0; font-family: 'Courier New', monospace; padding: 20px; overflow-x: hidden; }
+        .terminal { background: #050505; border: 1px solid #333; height: 280px; overflow-y: auto; padding: 10px; font-size: 0.8em; box-shadow: inset 0 0 15px #000; }
+        .status-bar { display: flex; align-items: center; gap: 10px; margin: 15px 0; padding: 10px; border: 1px solid #222; }
+        #statusLight { width: 12px; height: 12px; border-radius: 50%; background: #300; transition: 0.3s; }
+        .uplink-zone { border: 2px dashed #0f0; padding: 30px; text-align: center; cursor: pointer; display: block; transition: 0.3s; }
+        .uplink-zone:hover { background: #001100; box-shadow: 0 0 15px #0f0; }
+        #previewContainer { margin-top: 15px; border-top: 1px solid #333; padding-top: 15px; }
+        iframe { width: 100%; height: 200px; border: 1px solid #111; background: #000; }
+        .launch-btn { width: 100%; padding: 15px; background: #111; color: #444; border: 1px solid #333; font-weight: bold; cursor: not-allowed; margin-top: 10px; }
+        .active-btn { background: #0f0 !important; color: #000 !important; cursor: pointer !important; box-shadow: 0 0 20px #0f0; }
         input[type="file"] { display: none; }
     </style>
 </head>
 <body>
-    <h1>ALTHEA ROUTER [BRIDGE]</h1>
+    <h1>ALTHEA ROUTER [V23.0]</h1>
     
     <div class="terminal" id="term">
-        <div><span class="cmd">system@althea:~$</span> bridge --ready</div>
+        <div>system@althea:~$ boot --sequence</div>
     </div>
 
-    <button id="modeBtn" class="toggle-btn" onclick="toggleMode()">MODE: LOCAL (IPHONE)</button>
+    <div class="status-bar">
+        <div id="statusLight"></div>
+        <span id="statusText" style="color: #444;">IDLE: AWAITING VESSEL...</span>
+    </div>
 
-    <label class="uplink-zone" style="margin-top: 15px;">
+    <label class="uplink-zone" id="dropZone">
         <span>[+] UPLINK / SCAN FILE</span>
-        <input type="file" id="fileInput" onchange="processFile(this)">
+        <input type="file" id="fileInput" onchange="initiateScan(this)">
     </label>
 
+    <div id="previewContainer" style="display:none;">
+        <iframe id="vesselFrame"></iframe>
+        <button id="launchBtn" class="launch-btn" onclick="startLaunch()">EXECUTE LAUNCH SEQUENCE</button>
+    </div>
+
     <script>
-        let isLocalMode = true;
         const term = document.getElementById('term');
-        const modeBtn = document.getElementById('modeBtn');
+        const light = document.getElementById('statusLight');
+        const sText = document.getElementById('statusText');
+        const btn = document.getElementById('launchBtn');
+        let finalPath = "";
 
-        function toggleMode() {
-            isLocalMode = !isLocalMode;
-            modeBtn.innerText = isLocalMode ? "MODE: LOCAL (IPHONE)" : "MODE: CLOUD (GITHUB)";
-            modeBtn.classList.toggle('active');
-            log(`Switching to ${isLocalMode ? 'Local Handoff' : 'Cloud Sync'}`);
-        }
-
-        function log(msg) {
-            term.innerHTML += `<div><span class="cmd">bridge_log:</span> ${msg}</div>`;
+        function log(msg, color = "#0f0") {
+            term.innerHTML += `<div><span style="color:#555">bridge_log:</span> <span style="color:${color}">${msg}</span></div>`;
             term.scrollTop = term.scrollHeight;
         }
 
-        function processFile(input) {
+        // CONSOLE MIRROR: Listen for messages from the iframe
+        window.addEventListener('message', (e) => {
+            if (e.data.type === 'vessel_log') {
+                log(`[VESSEL]: ${e.data.msg}`, "cyan");
+            }
+        });
+
+        function initiateScan(input) {
             const file = input.files[0];
             if (!file) return;
 
+            // Updated pathing for PC-synced folder
             const safeName = encodeURIComponent(file.name);
-            let finalURL = "";
-
-            if (isLocalMode) {
-                // FORCE: Look at your iPhone's Pyto folder
-                finalURL = "googlechrome://localhost/~/Documents/ALTHEA%20Router/apps/" + safeName;
-                log(`Directing Chrome to Local Sandbox...`);
-            } else {
-                // SYNC: Look at the GitHub Pages folder [cite: 2026-01-13]
-                finalURL = "googlechrome://cbash000.github.io/Chrome_door/apps/" + safeName;
-                log(`Directing Chrome to GitHub Cloud...`);
-            }
-
-            log(`Deep-Link: ${finalURL}`);
+            const cloudURL = `https://cbash000-cmd.github.io/Chrome_door/apps/${safeName}`;
             
-            setTimeout(() => {
-                window.location.href = finalURL;
-            }, 800);
+            log(`Probing: ${file.name}...`);
+            document.getElementById('previewContainer').style.display = "block";
+            const frame = document.getElementById('vesselFrame');
+            frame.src = cloudURL;
+
+            frame.onload = () => {
+                light.style.background = "#0f0";
+                light.style.boxShadow = "0 0 15px #0f0";
+                sText.innerText = "ONLINE: HANDSHAKE SUCCESS";
+                sText.style.color = "#0f0";
+                btn.classList.add('active-btn');
+                btn.innerText = "EXECUTE LAUNCH SEQUENCE";
+                log("Vessel integrity verified.");
+            };
+
+            finalPath = "googlechrome://" + cloudURL.replace("https://", "");
+        }
+
+        function startLaunch() {
+            if (!finalPath) return;
+            log("CRITICAL: Initializing Handoff...", "#fff");
+            log("3... 2... 1...", "#0f0");
+            setTimeout(() => { window.location.href = finalPath; }, 1500);
         }
     </script>
 </body>
