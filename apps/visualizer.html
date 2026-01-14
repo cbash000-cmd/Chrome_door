@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALTHEA | Visualizer Vessel</title>
+    <style>
+        body { margin: 0; background: #000; overflow: hidden; font-family: monospace; }
+        canvas { display: block; }
+        .ui { position: absolute; top: 20px; left: 20px; color: #0f0; pointer-events: none; }
+        .back-btn { position: absolute; bottom: 20px; right: 20px; background: none; border: 1px solid #0f0; color: #0f0; padding: 10px; cursor: pointer; pointer-events: auto; }
+    </style>
+</head>
+<body>
+    <div class="ui">
+        <div>VESSEL: VISUALIZER</div>
+        <div id="fps">FPS: --</div>
+    </div>
+    <button class="back-btn" onclick="window.history.back()">RETREAT TO DOOR</button>
+    <canvas id="canvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.v = (Math.random() * 2) + 0.5;
+            }
+            draw() {
+                this.y -= this.v;
+                if (this.y < -10) this.y = canvas.height + 10;
+                ctx.fillStyle = '#0f0';
+                ctx.fillRect(this.x, this.y, 2, 2);
+            }
+        }
+
+        function init() {
+            resize();
+            for(let i=0; i<100; i++) particles.push(new Particle());
+            animate();
+        }
+
+        let lastTime = 0;
+        function animate(time) {
+            ctx.fillStyle = 'rgba(0,0,0,0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => p.draw());
+            
+            const delta = time - lastTime;
+            lastTime = time;
+            document.getElementById('fps').innerText = `FPS: ${Math.round(1000/delta)}`;
+            
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener('resize', resize);
+        init();
+    </script>
+</body>
+</html>
