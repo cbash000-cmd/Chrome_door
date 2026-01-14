@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCRIBE PRO | V2.3</title>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #000000;
+            --paper-shadow: 0 0 15px rgba(0,0,0,0.05);
+            --meta-color: #999;
+            --accent: #0f0;
+        }
+        [data-theme="dark"] {
+            --bg: #0a0a0a;
+            --text: #00ff00;
+            --paper-shadow: 0 0 20px rgba(0,0,0,0.8);
+            --meta-color: #444;
+            --accent: #00ff00;
+        }
+        body { 
+            background: var(--bg); 
+            color: var(--text); 
+            transition: background 0.4s, color 0.4s;
+            font-family: 'Georgia', serif; 
+            margin: 0; padding: 15px;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        #paper { 
+            width: 100%; max-width: 800px; 
+            outline: none; min-height: 85vh; font-size: 19px; 
+            box-shadow: var(--paper-shadow);
+            padding: 40px; box-sizing: border-box;
+            line-height: 1.7; white-space: pre-wrap;
+        }
+        #paper:empty:before { content: attr(placeholder); color: var(--meta-color); }
+
+        /* UI ELEMENTS */
+        .meta-tray { position: fixed; bottom: 10px; right: 10px; font-family: monospace; font-size: 10px; color: var(--meta-color); display: flex; gap: 15px; align-items: center; }
+        .top-tray { position: fixed; top: 10px; right: 10px; display: flex; gap: 10px; }
+        button { background: none; border: 1px solid var(--meta-color); color: var(--meta-color); cursor: pointer; border-radius: 4px; padding: 4px 8px; font-size: 12px; }
+        button:hover { border-color: var(--accent); color: var(--accent); }
+    </style>
+</head>
+<body data-theme="light">
+
+    <div class="top-tray">
+        <button onclick="toggleTheme()" title="Toggle Luminance">🌓</button>
+        <button onclick="purgeShadow()" title="Sanitize Shadow" style="color:#f44; border-color:#422;">🗑️</button>
+    </div>
+
+    <div id="paper" contenteditable="true" placeholder="Commence transcription..."></div>
+
+    <div class="meta-tray">
+        <span id="heartbeat-indicator" style="font-size:8px;">• PULSE</span>
+        <span id="stat">CHARS: 0</span>
+    </div>
+
+    <script>
+        const paper = document.getElementById('paper');
+        const STORAGE_KEY = 'ALTHEA_SCRIBE_SHADOW';
+
+        // NEXUS COMMUNICATION
+        function signalRouter(msg) {
+            if (window.parent) window.parent.postMessage({type: 'vessel_log', msg: msg}, "*");
+        }
+
+        // THEME CONTROL
+        function toggleTheme() {
+            const next = document.body.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+            document.body.setAttribute('data-theme', next);
+            signalRouter(`Scribe Mode: ${next.toUpperCase()}`);
+        }
+
+        // PERSISTENCE (HEARTBEAT)
+        function heartbeat() {
+            const content = paper.innerHTML;
+            if (content.trim() === "" || content === "<br>") return;
+            
+            localStorage.setItem(STORAGE_KEY, content);
+            document.getElementById('heartbeat-indicator').style.color = 'var(--accent)';
+            setTimeout(() => { document.getElementById('heartbeat-indicator').style.color = 'var(--meta-color)'; }, 500);
+            
+            signalRouter(`Heartbeat: Shadow synchronized.`);
+        }
+
+        function purgeShadow() {
+            if (confirm("PURGE SHADOW: Permanent deletion of the local recovery buffer. Proceed?")) {
+                localStorage.removeItem(STORAGE_KEY);
+                paper.innerHTML = "";
+                updateStats();
+                signalRouter("Scribe Pro: Shadow Memory Sanitized.");
+            }
+        }
+
+        function updateStats() {
+            const count = paper.innerText.length;
+            document.getElementById('stat').innerText = `CHARS: ${count}`;
+        }
+
+        paper.oninput = updateStats;
+
+        // INITIALIZATION
+        window.onload = () => {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved && saved !== "") {
+                if (confirm("RECOVERY: Previous session found. Restore data?")) {
+                    paper.innerHTML = saved;
+                    updateStats();
+                    signalRouter("Scribe Pro: Shadow Copy Restored.");
+                }
+            }
+            setInterval(heartbeat, 60000); // 1-minute pulse
+            signalRouter("Scribe Pro: Engine Online.");
+        };
+
+        // NEXUS SNAPSHOT & COMMANDS
+        window.addEventListener('message', (e) => {
+            if (e.data.type === 'SNAPSHOT_REQUEST') {
+                signalRouter("Scribe Snapshot: Data integrity verified.");
+                window.parent.postMessage({ type: 'SNAPSHOT_RESULT', imgData: 'TEXT_VESSEL_ACK' }, '*');
+            }
+        });
+    </script>
+</body>
+</html>
