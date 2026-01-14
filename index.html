@@ -3,99 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ALTHEA | V23.1 PRODUCTION</title>
+    <title>ALTHEA NEXUS | V25.0</title>
     <style>
-        body { background: #000; color: #0f0; font-family: 'Courier New', monospace; padding: 20px; overflow-x: hidden; }
-        .terminal { background: #050505; border: 1px solid #333; height: 250px; overflow-y: auto; padding: 10px; font-size: 0.8em; box-shadow: inset 0 0 15px #000; margin-bottom: 10px; }
-        .status-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; padding: 10px; border: 1px solid #222; background: #080808; }
-        #statusLight { width: 12px; height: 12px; border-radius: 50%; background: #300; transition: 0.3s; box-shadow: 0 0 5px #300; }
-        .uplink-zone { border: 2px dashed #0f0; padding: 30px; text-align: center; cursor: pointer; display: block; transition: 0.3s; margin-bottom: 20px; }
-        .uplink-zone:hover { background: #001100; box-shadow: 0 0 15px #0f0; }
-        #previewContainer { border-top: 1px solid #333; padding-top: 15px; display: none; }
-        iframe { width: 100%; height: 250px; border: 1px solid #111; background: #000; }
-        .launch-btn { width: 100%; padding: 18px; background: #111; color: #444; border: 1px solid #333; font-weight: bold; cursor: not-allowed; margin-top: 10px; font-size: 1.1em; }
-        .active-btn { background: #0f0 !important; color: #000 !important; cursor: pointer !important; box-shadow: 0 0 20px #0f0; }
-        input[type="file"] { display: none; }
-        .label-text { color: #555; font-size: 0.7em; text-transform: uppercase; }
+        :root { --neon-green: #0f0; --dark-bg: #000; --panel-bg: #0a0a0a; }
+        body { background: var(--dark-bg); color: var(--neon-green); font-family: 'Courier New', monospace; margin: 0; padding: 15px; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        .terminal { background: #050505; border: 1px solid #333; height: 150px; overflow-y: auto; padding: 10px; font-size: 12px; margin-bottom: 10px; }
+        .status-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 0.8em; }
+        #statusLight { width: 10px; height: 10px; border-radius: 50%; background: #300; }
+        .portal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; flex-grow: 1; min-height: 0; }
+        .panel { display: flex; flex-direction: column; border: 1px solid #222; background: var(--panel-bg); }
+        .panel-header { padding: 5px; font-size: 10px; background: #111; border-bottom: 1px solid #222; display: flex; justify-content: space-between; }
+        textarea { flex-grow: 1; background: transparent; color: var(--neon-green); border: none; padding: 10px; resize: none; font-size: 11px; outline: none; }
+        iframe { flex-grow: 1; background: #fff; border: none; }
+        .controls { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; margin-top: 10px; }
+        button { background: #111; color: var(--neon-green); border: 1px solid var(--neon-green); padding: 10px; cursor: pointer; font-size: 10px; font-weight: bold; }
+        button:hover { background: var(--neon-green); color: #000; }
+        .btn-glow { box-shadow: 0 0 10px var(--neon-green); }
+        #fileInputLabel { background: #111; color: cyan; border: 1px dashed cyan; text-align: center; padding: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
-    <h1 style="margin-bottom:5px;">ALTHEA ROUTER [PRODUCTION]</h1>
-    <div class="label-text">Nexus Bridge v23.1 // Real GitHub Direct</div>
-    
-    <div class="terminal" id="term">
-        <div>system@althea:~$ boot --production-sync</div>
-    </div>
-
-    <div class="status-bar">
+    <div class="status-row">
         <div id="statusLight"></div>
-        <span id="statusText" style="color: #444;">IDLE: AWAITING VESSEL...</span>
+        <span id="statusText">SYSTEM READY: AWAITING UPLINK</span>
     </div>
 
-    <label class="uplink-zone" id="dropZone">
-        <span>[+] UPLINK / SCAN FILE</span>
-        <input type="file" id="fileInput" onchange="initiateScan(this)">
+    <div class="terminal" id="term"><div>[NEXUS BOOT COMPLETE]</div></div>
+
+    <label id="fileInputLabel">
+        [+] SCAN LOCAL VESSEL (IMITATION MODE)
+        <input type="file" id="fileInput" style="display:none" onchange="loadVessel(this)">
     </label>
 
-    <div id="previewContainer">
-        <div class="label-text" style="margin-bottom:5px;">Live Vessel Preview (Cloud Source):</div>
-        <iframe id="vesselFrame"></iframe>
-        <button id="launchBtn" class="launch-btn" onclick="startLaunch()">EXECUTE LAUNCH SEQUENCE</button>
+    <div class="portal-grid">
+        <div class="panel">
+            <div class="panel-header"><span>CODE INSPECTOR</span><span id="fileName">---</span></div>
+            <textarea id="codeEditor" spellcheck="false" placeholder="Vessel code will manifest here..."></textarea>
+        </div>
+        <div class="panel">
+            <div class="panel-header"><span>PORTAL VIEW</span><span id="fpsCounter">0 FPS</span></div>
+            <iframe id="vesselFrame" sandbox="allow-scripts allow-forms allow-modals"></iframe>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button onclick="applyChanges()" class="btn-glow">APPLY CHANGES</button>
+        <button onclick="saveFile()">SAVE TO DEVICE</button>
+        <button onclick="pushToChrome()" style="border-color:cyan; color:cyan;">PUSH TO CHROME</button>
     </div>
 
     <script>
-        const term = document.getElementById('term');
-        const light = document.getElementById('statusLight');
-        const sText = document.getElementById('statusText');
-        const btn = document.getElementById('launchBtn');
-        let finalPath = "";
+        const log = (m) => { const d = document.getElementById('term'); d.innerHTML += `<div>> ${m}</div>`; d.scrollTop = d.scrollHeight; };
+        let currentCloudURL = "";
 
-        function log(msg, color = "#0f0") {
-            const time = new Date().toLocaleTimeString().split(' ')[0];
-            term.innerHTML += `<div><span style="color:#333">[${time}]</span> <span style="color:${color}">${msg}</span></div>`;
-            term.scrollTop = term.scrollHeight;
-        }
-
-        // CONSOLE MIRROR: Listens for "Voice" from hook.html or test.html [cite: 2026-01-14]
+        // Capture Telemetry from Vessel [cite: 2026-01-14]
         window.addEventListener('message', (e) => {
             if (e.data.type === 'vessel_log') {
-                log(`[VESSEL]: ${e.data.msg}`, "cyan");
+                log(`<span style="color:cyan">[TELEMETRY]:</span> ${e.data.msg}`);
+                if(e.data.msg.includes("fps")) document.getElementById('fpsCounter').innerText = e.data.msg;
             }
         });
 
-        function initiateScan(input) {
+        function loadVessel(input) {
             const file = input.files[0];
             if (!file) return;
-
-            // CORRECTED PATH: Points to the /apps/ subfolder verified via PC
-            const safeName = encodeURIComponent(file.name);
-            const cloudURL = `https://cbash000-cmd.github.io/Chrome_door/apps/${safeName}`;
-            
-            log(`Probing Path: /apps/${file.name}...`, "#aaa");
-            document.getElementById('previewContainer').style.display = "block";
-            const frame = document.getElementById('vesselFrame');
-            frame.src = cloudURL;
-
-            frame.onload = () => {
-                // If frame loads, we assume success unless 404 is visible
-                light.style.background = "#0f0";
-                light.style.boxShadow = "0 0 15px #0f0";
-                sText.innerText = "ONLINE: HANDSHAKE SUCCESS";
-                sText.style.color = "#0f0";
-                btn.classList.add('active-btn');
-                btn.innerText = "EXECUTE LAUNCH SEQUENCE";
-                log("Cloud Handshake Confirmed.");
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById('codeEditor').value = e.target.result;
+                document.getElementById('fileName').innerText = file.name;
+                currentCloudURL = `cbash000-cmd.github.io/Chrome_door/apps/${encodeURIComponent(file.name)}`;
+                applyChanges();
+                log(`Vessel ${file.name} loaded into Portal.`);
             };
-
-            // PROTOCOL: Forces the Chrome engine to take over [cite: 2026-01-13]
-            finalPath = "googlechrome://" + cloudURL.replace("https://", "");
+            reader.readAsText(file);
         }
 
-        function startLaunch() {
-            if (!finalPath) return;
-            log("CRITICAL: Initializing Local Handoff...", "#fff");
-            log("Routing to Chrome Engine...", "#0f0");
-            setTimeout(() => { window.location.href = finalPath; }, 1200);
+        function applyChanges() {
+            const content = document.getElementById('codeEditor').value;
+            const blob = new Blob([content], { type: 'text/html' });
+            const frame = document.getElementById('vesselFrame');
+            if(frame.src) URL.revokeObjectURL(frame.src);
+            frame.src = URL.createObjectURL(blob);
+            document.getElementById('statusLight').style.background = '#0f0';
+            document.getElementById('statusText').innerText = "ONLINE: IMITATION ACTIVE";
+            log("Nexus Injection Refreshed.");
+        }
+
+        function saveFile() {
+            const content = document.getElementById('codeEditor').value;
+            const blob = new Blob([content], { type: 'text/html' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "ALTHEA_UPDATE_" + document.getElementById('fileName').innerText;
+            link.click();
+            log("System Export Triggered.");
+        }
+
+        function pushToChrome() {
+            if(!currentCloudURL) return log("ERROR: No Cloud Path Defined");
+            log("Initiating Chrome Deep-Link...");
+            setTimeout(() => { window.location.href = "googlechrome://" + currentCloudURL; }, 1000);
         }
     </script>
 </body>
