@@ -4,148 +4,154 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>ALTHEA NEXUS | V26.6 RECOVERY_FIX</title>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>ALTHEA NEXUS | SOVEREIGN V27.1</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
-        :root { --neon-green: #0f0; --dark-bg: #000; --panel-bg: #0a0a0a; --ui-cyan: #0ff; --bully-magenta: #f0f; }
-        body { background: var(--dark-bg); color: var(--neon-green); font-family: 'Courier New', monospace; margin: 0; padding: 10px; display: flex; flex-direction: column; height: 100vh; box-sizing: border-box; overflow: hidden; }
-        .terminal { background: #050505; border: 1px solid #333; height: 80px; overflow-y: auto; padding: 8px; font-size: 10px; margin-bottom: 8px; border-left: 3px solid var(--neon-green); }
-        #fileInputLabel { background: #111; color: var(--ui-cyan); border: 1px dashed var(--ui-cyan); text-align: center; padding: 10px; cursor: pointer; font-size: 10px; margin-bottom: 8px; display: block; }
-        .cli-row { display: flex; gap: 5px; margin-bottom: 8px; background: #111; padding: 5px; border: 1px solid #222; font-size: 10px; }
-        #cliInput { flex-grow: 1; background: transparent; border: none; color: #fff; font-family: monospace; outline: none; }
-        .portal-grid { display: flex; flex-direction: column; gap: 8px; flex-grow: 1; min-height: 0; position: relative; }
-        @media (min-width: 601px) { .portal-grid { flex-direction: row; } }
-        .panel { display: flex; flex-direction: column; border: 1px solid #222; background: var(--panel-bg); flex: 1; overflow: hidden; }
-        .panel.fullscreen { position: fixed !important; inset: 0 !important; z-index: 10000; width: 100vw; height: 100vh; margin: 0; }
-        .panel-header { padding: 6px; font-size: 10px; background: #111; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; }
-        textarea { flex-grow: 1; background: transparent; color: var(--neon-green); border: none; padding: 10px; resize: none; font-size: 11px; outline: none; font-family: 'Courier New', monospace; }
-        iframe { flex-grow: 1; background: #fff; border: none; }
-        .controls { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-top: 8px; }
-        .btn { background: #111; color: var(--neon-green); border: 1px solid var(--neon-green); padding: 10px 2px; cursor: pointer; font-size: 8px; font-weight: bold; text-align: center; }
+        :root { --neon: #0f0; --bg: #000; --ui: #0ff; --magenta: #f0f; --panel: #0a0a0a; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg); color: var(--neon); font-family: 'Courier New', monospace; margin: 0; padding: 10px; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        
+        /* TERMINAL & CLI */
+        .terminal { background: #050505; border: 1px solid #333; height: 90px; overflow-y: auto; padding: 8px; font-size: 10px; margin-bottom: 8px; border-left: 3px solid var(--neon); box-shadow: inset 0 0 10px #000; }
+        .cli-row { display: flex; gap: 8px; margin-bottom: 8px; background: #111; padding: 8px; border: 1px solid #222; font-size: 11px; align-items: center; }
+        #cliInput { flex: 1; background: transparent; border: none; color: #fff; outline: none; font-family: inherit; }
+
+        /* PICKER SYSTEM */
+        .ingest-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px; }
+        .picker-label { background: #111; color: var(--ui); border: 1px dashed var(--ui); text-align: center; padding: 12px; cursor: pointer; font-size: 10px; font-weight: bold; transition: 0.3s; }
+        .picker-label:active { background: var(--ui); color: #000; }
+
+        /* WORKSTATION PANELS */
+        .portal-grid { display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 0; position: relative; }
+        @media (min-width: 768px) { .portal-grid { flex-direction: row; } }
+        .panel { display: flex; flex-direction: column; border: 1px solid #222; background: var(--panel); flex: 1; overflow: hidden; position: relative; border-radius: 4px; }
+        .panel.fullscreen { position: fixed !important; inset: 0 !important; z-index: 10000; width: 100vw; height: 100vh; margin: 0; border: none; }
+        .panel-header { padding: 8px; font-size: 10px; background: #151515; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; text-transform: uppercase; letter-spacing: 1px; }
+        .max-btn { background: transparent; color: var(--neon); border: 1px solid var(--neon); font-size: 9px; padding: 3px 8px; cursor: pointer; border-radius: 2px; }
+
+        /* EDITOR & IFRAME */
+        textarea { flex: 1; background: transparent; color: var(--neon); border: none; padding: 12px; resize: none; font-size: 12px; outline: none; font-family: 'Courier New', monospace; line-height: 1.4; }
+        iframe { flex: 1; background: #fff; border: none; width: 100%; height: 100%; }
+
+        /* ACTION FOOTER */
+        .controls { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 8px; }
+        .action-btn { background: #111; color: var(--neon); border: 1px solid var(--neon); padding: 12px 2px; cursor: pointer; font-size: 9px; font-weight: bold; text-align: center; border-radius: 2px; }
+        .action-btn:active { background: var(--neon); color: #000; }
     </style>
 </head>
 <body>
-    <div class="terminal" id="term"><div>[EMULATION_ENGINE_V26.6] Ready for Boot.</div></div>
+    <div class="terminal" id="term"><div>[SYSTEM_INIT] ALTHEA_NEXUS_V27.1 READY.</div></div>
 
-    <label id="fileInputLabel">
-        [M] MOUNT & EMULATE FOLDER
-        <input type="file" id="folderPicker" webkitdirectory directory multiple style="display:none" onchange="mountAndIngest(this)">
-    </label>
+    <div class="ingest-grid">
+        <label class="picker-label"> [M] MOUNT FOLDER <input type="file" webkitdirectory directory multiple style="display:none" onchange="handleMount(this.files)"></label>
+        <label class="picker-label" style="color:var(--magenta); border-color:var(--magenta)"> [Z] ZIP INGEST <input type="file" accept=".zip" style="display:none" onchange="handleZip(this)"></label>
+    </div>
 
     <div class="cli-row">
-        <span style="color:var(--ui-cyan)">root@nexus:~#</span>
-        <input type="text" id="cliInput" placeholder="ls | open [file]" onkeydown="if(event.key==='Enter') runCommand(this.value)">
+        <span style="color:var(--ui)">root@nexus:~#</span>
+        <input type="text" id="cliInput" spellcheck="false" autocomplete="off" placeholder="ls | open [file] | clear" onkeydown="if(event.key==='Enter') runCMD(this.value)">
     </div>
 
     <div class="portal-grid">
         <div class="panel" id="p1">
-            <div class="panel-header"><span>INSPECTOR: <span id="curFile" style="color:#555">none</span></span><button onclick="toggleFS('p1')" style="background:none;color:var(--neon-green);border:1px solid">MAX</button></div>
-            <textarea id="codeEditor" spellcheck="false" oninput="autoSave()"></textarea>
+            <div class="panel-header"><span>Inspector: <span id="curFile" style="color:#666">none</span></span><button class="max-btn" onclick="toggleFS('p1')">MAX</button></div>
+            <textarea id="editor" spellcheck="false" oninput="autoSave()"></textarea>
         </div>
         <div class="panel" id="p2">
-            <div class="panel-header"><span>PORTAL</span><button onclick="toggleFS('p2')" style="background:none;color:var(--neon-green);border:1px solid">MAX</button></div>
-            <iframe id="vesselFrame"></iframe>
+            <div class="panel-header"><span>Portal</span><button class="max-btn" onclick="toggleFS('p2')">MAX</button></div>
+            <iframe id="portal"></iframe>
         </div>
     </div>
 
     <div class="controls">
-        <div class="btn" onclick="seedProject()" style="color:var(--bully-magenta)">STRESS_TEST</div>
-        <div class="btn" onclick="applyChanges()">HOT_RELOAD</div>
-        <div class="btn" onclick="exportLinuxMirror()" style="color:orange">EXPORT_TXT</div>
-        <div class="btn" onclick="document.getElementById('recInput').click()" style="color:#fff">RECOVERY</div>
+        <div class="action-btn" onclick="hotReload()">HOT_RELOAD</div>
+        <div class="action-btn" onclick="exportData()" style="color:orange; border-color:orange;">EXPORT</div>
+        <div class="action-btn" onclick="document.getElementById('recIn').click()" style="color:#fff; border-color:#fff;">RECOVERY</div>
+        <div class="action-btn" onclick="location.reload()" style="color:red; border-color:red;">PURGE</div>
     </div>
-    <input type="file" id="recInput" style="display:none" onchange="importLinuxMirror(this)">
+    <input type="file" id="recIn" style="display:none" onchange="importData(this)">
 
     <script>
-        const DB_NAME = "NexusFS", STORE_NAME = "files";
-        let currentFilePath = "";
+        const DB_NAME = "AltheaNexusFS", STORE = "shadow_drive";
+        let activePath = "";
         const log = (m, c="#0f0") => { const d = document.getElementById('term'); d.innerHTML += `<div>> <span style="color:${c}">${m}</span></div>`; d.scrollTop = d.scrollHeight; };
-        const openDB = () => new Promise(res => { const r = indexedDB.open(DB_NAME, 1); r.onupgradeneeded = e => e.target.result.createObjectStore(STORE_NAME); r.onsuccess = e => res(e.target.result); });
+        const openDB = () => new Promise(res => { const r = indexedDB.open(DB_NAME, 1); r.onupgradeneeded = e => e.target.result.createObjectStore(STORE); r.onsuccess = e => res(e.target.result); });
 
-        function toggleFS(id) { const p = document.getElementById(id); p.classList.toggle('fullscreen'); }
+        function toggleFS(id) { const p = document.getElementById(id); const is = p.classList.toggle('fullscreen'); p.querySelector('.max-btn').innerText = is ? 'EXIT' : 'MAX'; }
 
-        async function mountAndIngest(input) {
-            const files = input.files;
-            const db = await openDB();
-            let count = 0;
-            for (const f of files) {
-                if (f.name.match(/\.(html|css|js|py|txt)$/)) {
-                    const content = await f.text();
-                    await db.transaction(STORE_NAME, "readwrite").objectStore(STORE_NAME).put(content, f.name);
-                    count++;
-                    // AUTO-BOOT priority: index.html -> app.py -> althea.py
-                    if (f.name.toLowerCase().includes('index.html') || f.name.toLowerCase().includes('althea')) {
-                        loadFile(f.name, content);
-                    }
+        async function handleMount(files) {
+            const d = await openDB(); let c = 0;
+            for (let f of files) {
+                if (f.name.match(/\.(html|py|js|css|txt)$/) && !f.name.includes('NEXUS')) {
+                    const txt = await f.text();
+                    await d.transaction(STORE, "readwrite").objectStore(STORE).put(txt, f.name);
+                    c++;
+                    if (f.name.toLowerCase().includes('index') || f.name.toLowerCase().includes('althea')) boot(f.name, txt);
                 }
             }
-            log(`INGESTED ${count} ASSETS. Portal Active.`, "#0f0");
+            log(`INGESTED ${c} ASSETS FROM PHYSICAL FOLDER.`, "var(--ui)");
         }
 
-        function loadFile(name, content) {
-            currentFilePath = name;
-            document.getElementById('curFile').innerText = name;
-            document.getElementById('codeEditor').value = content;
-            applyChanges();
-        }
-
-        async function runCommand(v) {
-            const [cmd, arg] = v.split(' ');
-            const db = await openDB();
-            if (cmd === 'ls') {
-                const keys = await new Promise(res => db.transaction(STORE_NAME).objectStore(STORE_NAME).getAllKeys().onsuccess = e => res(e.target.result));
-                log("FILES: " + (keys.join(', ') || 'EMPTY'), "white");
-            } else if (cmd === 'open' && arg) {
-                const req = db.transaction(STORE_NAME).objectStore(STORE_NAME).get(arg);
-                req.onsuccess = () => req.result ? loadFile(arg, req.result) : log("NOT FOUND", "red");
+        async function handleZip(input) {
+            const f = input.files[0]; if(!f) return;
+            log("EXTRACTING ZIP ARCHIVE...", "var(--magenta)");
+            const z = await JSZip.loadAsync(f); const d = await openDB();
+            for (let [n, e] of Object.entries(z.files)) {
+                if (!e.dir && n.match(/\.(html|py|js|css|txt)$/)) {
+                    const txt = await e.async("text");
+                    await d.transaction(STORE, "readwrite").objectStore(STORE).put(txt, n);
+                    if (n.includes('index') || n.includes('althea')) boot(n, txt);
+                }
             }
+            log("ZIP SYNC COMPLETE.", "var(--magenta)");
+        }
+
+        function boot(n, t) { activePath = n; document.getElementById('curFile').innerText = n; document.getElementById('editor').value = t; hotReload(); }
+
+        async function runCMD(v) {
+            const [c, a] = v.split(' '), d = await openDB();
+            if (c === 'ls') {
+                const k = await new Promise(r => d.transaction(STORE).objectStore(STORE).getAllKeys().onsuccess = e => r(e.target.result));
+                log("DRIVE_MAP: " + (k.join(' | ') || 'EMPTY'), "white");
+            } else if (c === 'open' && a) {
+                const r = d.transaction(STORE).objectStore(STORE).get(a);
+                r.onsuccess = () => r.result ? boot(a, r.result) : log("FILE NOT FOUND", "red");
+            } else if (c === 'clear') { document.getElementById('term').innerHTML = ''; }
             document.getElementById('cliInput').value = '';
         }
 
         async function autoSave() {
-            if (!currentFilePath) return;
-            const db = await openDB();
-            await db.transaction(STORE_NAME, "readwrite").objectStore(STORE_NAME).put(document.getElementById('codeEditor').value, currentFilePath);
+            if (!activePath) return;
+            const d = await openDB();
+            await d.transaction(STORE, "readwrite").objectStore(STORE).put(document.getElementById('editor').value, activePath);
         }
 
-        function applyChanges() {
-            const code = document.getElementById('codeEditor').value;
-            const frame = document.getElementById('vesselFrame');
-            const blob = new Blob([code], { type: 'text/html' });
-            if(frame.src.startsWith('blob:')) URL.revokeObjectURL(frame.src);
-            frame.src = URL.createObjectURL(blob);
-            log("EMULATION REFRESHED.", "white");
+        function hotReload() {
+            const b = new Blob([document.getElementById('editor').value], { type: 'text/html' });
+            const p = document.getElementById('portal');
+            if(p.src) URL.revokeObjectURL(p.src);
+            p.src = URL.createObjectURL(b);
+            log("PORTAL SYNC SUCCESSFUL.");
         }
 
-        async function exportLinuxMirror() {
-            const db = await openDB();
-            const store = db.transaction(STORE_NAME, "readonly").objectStore(STORE_NAME);
-            const keys = await new Promise(res => store.getAllKeys().onsuccess = e => res(e.target.result));
-            const vals = await new Promise(res => store.getAll().onsuccess = e => res(e.target.result));
-            const data = { files: {} };
-            keys.forEach((k, i) => data.files[k] = vals[i]);
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(new Blob([JSON.stringify(data)], {type:'text/plain'}));
-            link.download = "NEXUS_IMAGE.txt";
-            link.click();
+        async function exportData() {
+            const d = await openDB(), s = d.transaction(STORE).objectStore(STORE);
+            const k = await new Promise(r => s.getAllKeys().onsuccess = e => r(e.target.result));
+            const v = await new Promise(r => s.getAll().onsuccess = e => r(e.target.result));
+            const out = { nexus_files: {} }; k.forEach((x, i) => out.nexus_files[x] = v[i]);
+            const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(out)], {type:'text/plain'}));
+            a.download = "NEXUS_IMAGE.txt"; a.click();
+            log("SYSTEM IMAGE EXPORTED.", "orange");
         }
 
-        async function importLinuxMirror(i) {
-            log("DECODING IMAGE...", "var(--ui-cyan)");
-            try {
-                const text = await i.files[0].text();
-                const data = JSON.parse(text), db = await openDB();
-                const tx = db.transaction(STORE_NAME, "readwrite");
-                await tx.objectStore(STORE_NAME).clear();
-                for (const [p, c] of Object.entries(data.files)) await tx.objectStore(STORE_NAME).put(c, p);
-                
-                // BOOT TRIGGER
-                const bootKey = Object.keys(data.files).find(k => k.toLowerCase().includes('html')) || Object.keys(data.files)[0];
-                loadFile(bootKey, data.files[bootKey]);
-                log("IMAGE BOOTED.", "#0f0");
-            } catch (e) { log("IO ERROR", "red"); }
+        async function importData(i) {
+            const t = await i.files[0].text(), d = await openDB(), o = JSON.parse(t);
+            const tx = d.transaction(STORE, "readwrite"); await tx.objectStore(STORE).clear();
+            for (let [p, c] of Object.entries(o.nexus_files)) await tx.objectStore(STORE).put(c, p);
+            const start = Object.keys(o.nexus_files)[0]; boot(start, o.nexus_files[start]);
+            log("VIRTUAL DRIVE RECONSTRUCTED.", "#fff");
         }
-
-        function seedProject() { loadFile('test.html', '<h1>NEXUS V26.6</h1><style>body{background:#000;color:#0f0;display:flex;justify-content:center;align-items:center;height:100vh;}</style>'); }
     </script>
 </body>
 </html>
