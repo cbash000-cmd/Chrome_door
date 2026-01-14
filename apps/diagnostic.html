@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ALTHEA | INJECTION TEST</title>
+    <style>
+        body { background: #000; color: #0f0; font-family: monospace; padding: 20px; }
+        .status { border: 1px solid #0f0; padding: 15px; margin-top: 10px; }
+        .success { color: #fff; background: #060; }
+    </style>
+</head>
+<body>
+    <h2>DIAGNOSTIC CHANNEL V1.0</h2>
+    <div class="status" id="step1">1. Vessel Loaded in Chrome: <span class="success">OK</span></div>
+    <div class="status" id="step2">2. Injection Site Reachable: PENDING...</div>
+    
+    <script>
+        // Test if this vessel can "see" the Producer AI space
+        window.onload = function() {
+            const step2 = document.getElementById('step2');
+            try {
+                if (window.opener || window.parent) {
+                    step2.innerHTML = "2. Injection Site Reachable: <span class='success'>ACTIVE</span>";
+                    step2.className += " success";
+                } else {
+                    step2.innerHTML = "2. Injection Site Reachable: FAIL (No Parent Access)";
+                }
+            } catch (e) {
+                step2.innerHTML = "2. Injection Site Reachable: LOCKED (Security Block)";
+            }
+        }
+    </script>
+</body>
+</html>
